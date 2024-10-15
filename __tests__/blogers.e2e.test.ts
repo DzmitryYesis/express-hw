@@ -1,9 +1,11 @@
 import {req} from './test-helper';
+import {SETTINGS} from '../src/settings';
+import {StatusCodeEnum} from '../src/constans';
 
 describe('/', () => {
-        // beforeAll(async () => { // очистка базы данных перед началом тестирования
-        //     setDB()
-        // })
+         beforeAll(async () => { // очистка базы данных перед началом тестирования
+             await req.delete(SETTINGS.PATH.TESTING).expect(StatusCodeEnum.NO_CONTENT_204)
+         })
 
         it('should get version', async () => {
             const res = await req
