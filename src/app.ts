@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import {SETTINGS} from './settings';
-import {blogsRouter, postsRouter, testingRouter} from './routers';
+import {blogsRouter, postsRouter, testingRouter} from './features';
 
 
 export const app = express();

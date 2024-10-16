@@ -1,4 +1,4 @@
-import {db, TDataBase} from '../db';
+import {db, TDataBase} from '../../db';
 
 export const testingRepository = {
     deleteAllData() {

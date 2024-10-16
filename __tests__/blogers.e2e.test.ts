@@ -1,9 +1,9 @@
 import {req} from './test-helper';
 import {SETTINGS} from '../src/settings';
-import {StatusCodeEnum} from '../src/constans';
+import {StatusCodeEnum} from '../src/constants';
 
 describe('/', () => {
-         beforeAll(async () => { // очистка базы данных перед началом тестирования
+         beforeAll(async () => {
              await req.delete(SETTINGS.PATH.TESTING).expect(StatusCodeEnum.NO_CONTENT_204)
          })
 
