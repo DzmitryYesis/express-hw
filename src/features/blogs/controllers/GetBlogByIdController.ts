@@ -11,6 +11,6 @@ export const GetBlogByIdController = (req: RequestWithParam<{ id: string }>, res
             .status(StatusCodeEnum.OK_200)
             .json(blog)
     } else {
-        res.status(StatusCodeEnum.NOT_FOUND_404)
+        res.status(StatusCodeEnum.NOT_FOUND_404).end()
     }
 }

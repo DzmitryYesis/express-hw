@@ -13,6 +13,6 @@ export const GetPostByIdController = (
             .status(StatusCodeEnum.OK_200)
             .json(post)
     } else {
-        res.status(StatusCodeEnum.NOT_FOUND_404)
+        res.status(StatusCodeEnum.NOT_FOUND_404).end()
     }
 }

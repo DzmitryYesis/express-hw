@@ -7,5 +7,6 @@ export const SETTINGS = {
         BLOGS: '/blogs',
         POSTS: '/posts',
         TESTING: '/testing/all-data'
-    }
+    },
+    AUTH_BASIC: 'admin:qwerty'
 }
