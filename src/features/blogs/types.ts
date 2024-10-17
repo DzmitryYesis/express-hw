@@ -4,6 +4,13 @@ export type TInputBlog = {
     websiteUrl: string;
 }
 
+export type TInputPost = {
+    title: string,
+    shortDescription: string,
+    content: string,
+    blogId: string
+}
+
 export type TOutPutErrorsType = {
     errorsMessages: TErrorMessage[]
 }
