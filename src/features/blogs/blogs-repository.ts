@@ -38,5 +38,9 @@ export const blogsRepository = {
         } else {
             return false
         }
+    },
+    createAndDelete(data: TInputBlog ,id: string) {
+        const newBlog = this.createBlog(data);
+        return this.deleteBlog(newBlog.id)
     }
 }
