@@ -1,14 +1,14 @@
-import {db} from '../../db';
+import {db, TBlog} from '../../db';
 import {TInputBlog} from './types';
 
 export const blogsRepository = {
-    getBlogs() {
+    async getBlogs(): Promise<TBlog[]> {
         return db.blogs
     },
-    getBlogById(id: string) {
+    async getBlogById(id: string): Promise<TBlog | undefined> {
         return db.blogs.find(b => b.id === id)
     },
-    createBlog(data: TInputBlog) {
+    async createBlog(data: TInputBlog): Promise<TBlog> {
         const newBlog = {
             id: Date.now().toString(),
             ...data
@@ -18,8 +18,8 @@ export const blogsRepository = {
 
         return newBlog
     },
-    updateBlogById(id: string, data: TInputBlog) {
-        const blog = this.getBlogById(id);
+    async updateBlogById(id: string, data: TInputBlog): Promise<boolean> {
+        const blog = await this.getBlogById(id);
 
         if (blog) {
             db.blogs = db.blogs.map(b => b.id === id ? {...b, ...data} : b)
@@ -28,8 +28,8 @@ export const blogsRepository = {
             return false
         }
     },
-    deleteBlog(id: string) {
-        const blog = this.getBlogById(id);
+    async deleteBlog(id: string): Promise<boolean> {
+        const blog = await this.getBlogById(id);
 
         if (blog) {
             const index = db.blogs.indexOf(blog);
