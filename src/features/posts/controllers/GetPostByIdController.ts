@@ -4,10 +4,10 @@ import {TPost} from '../../../db';
 import {postsRepository} from '../posts-repository';
 import {StatusCodeEnum} from '../../../constants';
 
-export const GetPostByIdController = (
+export const GetPostByIdController = async (
     req: RequestWithParam<{ id: string }>,
     res: Response<TPost>) => {
-    const post = postsRepository.getPostById(req.params.id)
+    const post = await postsRepository.getPostById(req.params.id)
     if (post) {
         res
             .status(StatusCodeEnum.OK_200)

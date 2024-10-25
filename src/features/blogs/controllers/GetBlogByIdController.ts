@@ -4,8 +4,8 @@ import {TBlog} from '../../../db';
 import {blogsRepository} from '../blogs-repository';
 import {StatusCodeEnum} from '../../../constants/';
 
-export const GetBlogByIdController = (req: RequestWithParam<{ id: string }>, res: Response<TBlog>) => {
-    const blog = blogsRepository.getBlogById(req.params.id)
+export const GetBlogByIdController = async (req: RequestWithParam<{ id: string }>, res: Response<TBlog>) => {
+    const blog = await blogsRepository.getBlogById(req.params.id)
     if (blog) {
         res
             .status(StatusCodeEnum.OK_200)

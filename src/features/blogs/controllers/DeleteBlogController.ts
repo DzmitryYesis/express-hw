@@ -3,10 +3,10 @@ import {RequestWithParam} from '../../../types';
 import {blogsRepository} from '../blogs-repository';
 import {StatusCodeEnum} from '../../../constants';
 
-export const DeleteBlogController = (req: RequestWithParam<{
+export const DeleteBlogController = async (req: RequestWithParam<{
     id: string
 }>, res: Response) => {
-    const isDeleteBlog = blogsRepository.deleteBlog(req.params.id);
+    const isDeleteBlog = await blogsRepository.deleteBlog(req.params.id);
 
     if (isDeleteBlog) {
         res.status(StatusCodeEnum.NO_CONTENT_204).end()

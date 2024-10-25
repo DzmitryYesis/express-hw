@@ -3,16 +3,18 @@ import {TInputPost} from '../blogs/types';
 import {blogsRepository} from '../blogs';
 
 export const postsRepository = {
-    getPosts() {
+    async getPosts(): Promise<TPost[]> {
         return db.posts
     },
-    getPostById(id: string) {
+    async getPostById(id: string): Promise<TPost | undefined> {
         return db.posts.find(p => p.id === id)
     },
-    createPost(data: TInputPost) {
+    async createPost(data: TInputPost): Promise<TPost> {
+        const blog = await blogsRepository.getBlogById(data.blogId)
+
         const newPost: TPost = {
             id: Date.now().toString(),
-            blogName: blogsRepository.getBlogById(data.blogId)?.name!,
+            blogName: blog!.name,
             ...data
         }
 
@@ -20,8 +22,8 @@ export const postsRepository = {
 
         return newPost;
     },
-    updatePostById(id: string, data: TInputPost) {
-        const post = this.getPostById(id);
+    async updatePostById(id: string, data: TInputPost): Promise<boolean> {
+        const post = await this.getPostById(id);
 
         if (post) {
             db.posts = db.posts.map(p => p.id === id ? {...p, ...data} : p)
@@ -30,8 +32,8 @@ export const postsRepository = {
             return false
         }
     },
-    deletePost(id: string) {
-        const post = this.getPostById(id);
+    async deletePost(id: string): Promise<boolean> {
+        const post = await this.getPostById(id);
 
         if (post) {
             const index = db.posts.indexOf(post);
