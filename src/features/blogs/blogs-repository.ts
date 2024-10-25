@@ -14,7 +14,7 @@ export const blogsRepository = {
             ...data
         }
 
-        const test = true;
+        const test = [true, false];
         db.blogs.push(newBlog);
 
         return {newBlog, test}
@@ -39,5 +39,9 @@ export const blogsRepository = {
         } else {
             return false
         }
+    },
+    createAndDelete(data: TInputBlog ,id: string) {
+        const newBlog = this.createBlog(data);
+        return this.deleteBlog(newBlog.newBlog.id)
     }
 }

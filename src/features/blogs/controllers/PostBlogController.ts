@@ -9,5 +9,5 @@ export const PostBlogController = (req: RequestWithBody<TInputBlog>, res: Respon
     const newBlog = blogsRepository.createBlog(req.body);
     res
         .status(StatusCodeEnum.CREATED_201)
-        .json(newBlog.newBlog)
+        .json(newBlog)
 }
