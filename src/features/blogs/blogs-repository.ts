@@ -14,10 +14,10 @@ export const blogsRepository = {
             ...data
         }
 
-        const test2 = false
+        const test = [true, false];
         db.blogs.push(newBlog);
 
-        return {newBlog, test2}
+        return {newBlog, test}
     },
     updateBlogById(id: string, data: TInputBlog) {
         const blog = this.getBlogById(id);
