@@ -56,7 +56,7 @@ describe('test CRUD flow for posts', () => {
             const res = await req
                 .post(SETTINGS.PATH.POSTS)
                 .set('authorization', `Basic ${authBasic}`)
-                .send({...postForTest, blogId: blog1.id + '1'})
+                .send({...postForTest, blogId: 'sdfg1'})
                 .expect(StatusCodeEnum.BAD_REQUEST_400)
 
             console.log(res.body)

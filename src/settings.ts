@@ -1,4 +1,5 @@
 import {config} from 'dotenv'
+
 config()
 
 export const SETTINGS = {
@@ -8,5 +9,9 @@ export const SETTINGS = {
         POSTS: '/posts',
         TESTING: '/testing/all-data'
     },
-    AUTH_BASIC: 'admin:qwerty'
+    AUTH_BASIC: 'admin:qwerty',
+    MONGO_URL: 'mongodb://localhost:27017',
+    DB_NAME: 'incubator',
+    DB_COLLECTION_BLOGS_NAME: 'blogsCollection',
+    DB_COLLECTION_POSTS_NAME: 'postsCollection'
 }

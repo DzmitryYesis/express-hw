@@ -5,8 +5,8 @@ import {StatusCodeEnum} from '../../constants';
 export const testingRouter = Router();
 
 const testingController = {
-    deleteAllData: (req: Request, res: Response) => {
-        testingRepository.deleteAllData();
+    deleteAllData: async (req: Request, res: Response) => {
+        await testingRepository.deleteAllData();
 
         res
             .status(StatusCodeEnum.NO_CONTENT_204)

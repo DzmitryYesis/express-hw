@@ -28,7 +28,9 @@ export const postBlogIdValidator = body('blogId')
     .withMessage('Must be a string')
     .isLength({min: 1})
     .withMessage('Min length must be 1')
-    .custom(blogId => {
-        const blog = blogsRepository.getBlogById(blogId)
-        return !!blog
-    }).withMessage('Blog not found')
+    .custom(async (blogId) => {
+        const blog =  await blogsRepository.getBlogById(blogId);
+            if (!blog) {
+                    throw new Error('Blog not found')
+            }
+    })
