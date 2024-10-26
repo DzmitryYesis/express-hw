@@ -1,6 +1,6 @@
 import {blogsCollection, postsCollection, TPost} from '../../db';
 import {TInputPost} from '../blogs/types';
-import {ObjectId} from 'mongodb';
+import {ObjectId, OptionalId} from 'mongodb';
 
 export const postsRepository = {
     async getPosts(): Promise<TPost[]> {
@@ -37,14 +37,13 @@ export const postsRepository = {
         const blog = await blogsCollection.findOne({_id: new ObjectId(data.blogId)})
 
         if (blog) {
-            const newPost: TPost = {
-                id: Date.now().toString(),
+            const newPost: Omit<TPost, 'id'> = {
                 blogName: blog.name,
                 createdAt: new Date().toISOString(),
                 ...data
             }
 
-           const result = await postsCollection.insertOne(newPost);
+           const result = await postsCollection.insertOne(newPost as OptionalId<TPost>);
 
             return {
                 id: result.insertedId.toString(),

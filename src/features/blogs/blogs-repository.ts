@@ -1,6 +1,6 @@
 import {blogsCollection, TBlog} from '../../db';
 import {TInputBlog} from './types';
-import {ObjectId} from 'mongodb';
+import {ObjectId, OptionalId} from 'mongodb';
 
 export const blogsRepository = {
     async getBlogs(): Promise<TBlog[]> {
@@ -32,14 +32,13 @@ export const blogsRepository = {
         return null
     },
     async createBlog(data: TInputBlog): Promise<TBlog> {
-        const newBlog: TBlog = {
-            id: Date.now().toString(),
+        const newBlog: Omit<TBlog, 'id'> = {
             createdAt: new Date().toISOString(),
             isMembership: false,
             ...data
         }
 
-        const result = await blogsCollection.insertOne(newBlog);
+        const result = await blogsCollection.insertOne(newBlog as OptionalId<TBlog>);
 
         return {
             id: result.insertedId.toString(),
