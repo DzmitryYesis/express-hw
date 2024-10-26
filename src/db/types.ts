@@ -1,13 +1,10 @@
-export type TDataBase = {
-    blogs: TBlog[],
-    posts: TPost[]
-}
-
 export type TBlog = {
     id: string,
     name: string,
     description: string,
-    websiteUrl: string
+    websiteUrl: string,
+    createdAt: string,
+    isMembership: boolean
 }
 
 export type TPost = {
@@ -16,5 +13,6 @@ export type TPost = {
     shortDescription: string,
     content: string,
     blogId: string,
-    blogName: string
+    blogName: string,
+    createdAt: string,
 }
