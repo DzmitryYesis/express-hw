@@ -4,13 +4,32 @@ import {StatusCodeEnum} from '../src/constants';
 import {blogForTest, postForTest} from './dataset';
 import {TErrorMessage, TInputPost} from '../src/features/blogs/types';
 import {TBlog, TPost} from '../src/db';
+import {MongoMemoryServer} from 'mongodb-memory-server';
+import {MongoClient} from 'mongodb';
 
 const authBasic = Buffer.from(SETTINGS.AUTH_BASIC, 'utf8').toString('base64');
 
+let mongoServer: MongoMemoryServer;
+let client: MongoClient;
+
 describe('test CRUD flow for posts', () => {
         beforeAll(async () => {
+            mongoServer = await MongoMemoryServer.create();
+            const uri = mongoServer.getUri();
+
+            client = new MongoClient(uri);
+            await client.connect();
+
+            const db = client.db();
+             db.collection('ваша-коллекция');
+
             await req.delete(SETTINGS.PATH.TESTING).expect(StatusCodeEnum.NO_CONTENT_204)
         })
+
+    afterAll(async () => {
+        await client.close();
+        await mongoServer.stop();
+    });
 
         it('should return empty array', async () => {
             const res = await req
@@ -56,7 +75,7 @@ describe('test CRUD flow for posts', () => {
             const res = await req
                 .post(SETTINGS.PATH.POSTS)
                 .set('authorization', `Basic ${authBasic}`)
-                .send({...postForTest, blogId: 'sdfg1'})
+                .send({...postForTest, blogId: '671d29f1b13de9708bfe729b'})
                 .expect(StatusCodeEnum.BAD_REQUEST_400)
 
             console.log(res.body)
@@ -84,8 +103,9 @@ describe('test CRUD flow for posts', () => {
                 id: expect.any(String),
                 ...postForTest,
                 blogId: blog1.id,
-                blogName: blog1.name
-            });
+                blogName: blog1.name,
+                createdAt: expect.any(String)
+            } as TPost);
             expect(resGet.body.length).toBe(1);
         })
 
@@ -111,8 +131,9 @@ describe('test CRUD flow for posts', () => {
                 id: expect.any(String),
                 ...postForTest,
                 blogId: blog1.id,
-                blogName: blog1.name
-            });
+                blogName: blog1.name,
+                createdAt: expect.any(String)
+            } as TPost);
         })
 
         it('shouldn\'t update post with id = post1.id', async () => {
@@ -124,7 +145,7 @@ describe('test CRUD flow for posts', () => {
             }
 
             await req
-                .put(`${SETTINGS.PATH.POSTS}/dfghd657567`)
+                .put(`${SETTINGS.PATH.POSTS}/671d29f1b13de9708bfe729b`)
                 .set('authorization', `Basic ${authBasic}`)
                 .send(data)
                 .expect(StatusCodeEnum.NOT_FOUND_404)
@@ -155,14 +176,15 @@ describe('test CRUD flow for posts', () => {
             expect(updatePost).toEqual({
                 id: post1.id,
                 blogName: post1.blogName,
+                createdAt: post1.createdAt,
                 ...data
-            });
+            } as TPost);
             expect(notUpdatePost).toEqual(post2);
         })
 
         it('shouldn\'t delete post with id = post1.id', async () => {
             await req
-                .delete(`${SETTINGS.PATH.POSTS}/dfghd657567`)
+                .delete(`${SETTINGS.PATH.POSTS}/671d29f1b13de9708bfe729b`)
                 .set('authorization', `Basic ${authBasic}`)
                 .expect(StatusCodeEnum.NOT_FOUND_404)
         })
