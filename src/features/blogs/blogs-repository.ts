@@ -15,7 +15,7 @@ export const blogsRepository = {
             isMembership: b.isMembership
         }))
     },
-    async getBlogById(id: string): Promise<TBlog> {
+    async getBlogById(id: string): Promise<TBlog | null> {
         const blog = await blogsCollection.findOne({_id: new ObjectId(id)});
 
         if (blog) {
@@ -29,7 +29,7 @@ export const blogsRepository = {
             }
         }
 
-        throw new Error('Oops!')
+        return null
     },
     async createBlog(data: TInputBlog): Promise<TBlog> {
         const newBlog: TBlog = {

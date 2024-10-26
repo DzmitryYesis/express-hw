@@ -16,7 +16,7 @@ export const postsRepository = {
             createdAt: p.createdAt
         }))
     },
-    async getPostById(id: string): Promise<TPost> {
+    async getPostById(id: string): Promise<TPost | null> {
         const post = await postsCollection.findOne({_id: new ObjectId(id)});
 
         if (post) {
@@ -31,7 +31,7 @@ export const postsRepository = {
             }
         }
 
-        throw new Error('Oops!')
+        return null
     },
     async createPost(data: TInputPost): Promise<TPost> {
         const blog = await blogsCollection.findOne({_id: new ObjectId(data.blogId)})
