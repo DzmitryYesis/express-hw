@@ -1,46 +1,67 @@
-import {db, TPost} from '../../db';
+import {blogsCollection, postsCollection, TPost} from '../../db';
 import {TInputPost} from '../blogs/types';
-import {blogsRepository} from '../blogs';
 
 export const postsRepository = {
     async getPosts(): Promise<TPost[]> {
-        return db.posts
-    },
-    async getPostById(id: string): Promise<TPost | undefined> {
-        return db.posts.find(p => p.id === id)
-    },
-    async createPost(data: TInputPost): Promise<TPost> {
-        const blog = await blogsRepository.getBlogById(data.blogId)
+        const posts = await postsCollection.find().toArray();
 
-        const newPost: TPost = {
-            id: Date.now().toString(),
-            blogName: blog!.name,
-            ...data
+        return posts.map(p => ({
+            id: p.id,
+            title: p.title,
+            content: p.content,
+            shortDescription: p.shortDescription,
+            blogName: p.blogName,
+            blogId: p.blogId
+        }))
+    },
+    async getPostById(id: string): Promise<TPost | null> {
+        const post = await postsCollection.findOne({id});
+
+        if (post) {
+            return {
+                id: post.id,
+                title: post.title,
+                content: post.content,
+                shortDescription: post.shortDescription,
+                blogName: post.blogName,
+                blogId: post.blogId
+            }
         }
 
-        db.posts.push(newPost)
+        return null
+    },
+    async createPost(data: TInputPost): Promise<TPost | null> {
+        const blog = await blogsCollection.findOne({id: data.blogId})
 
-        return newPost;
+        if (blog) {
+            const newPost: TPost = {
+                id: Date.now().toString(),
+                blogName: blog.name,
+                ...data
+            }
+
+            await postsCollection.insertOne(newPost);
+
+            return {
+                id: newPost.id,
+                title: newPost.title,
+                content: newPost.content,
+                shortDescription: newPost.shortDescription,
+                blogName: newPost.blogName,
+                blogId: newPost.blogId
+            };
+        }
+
+        return null
     },
     async updatePostById(id: string, data: TInputPost): Promise<boolean> {
-        const post = await this.getPostById(id);
+        const result = await postsCollection.updateOne({id}, {$set: {...data}})
 
-        if (post) {
-            db.posts = db.posts.map(p => p.id === id ? {...p, ...data} : p)
-            return true
-        } else {
-            return false
-        }
+        return result.matchedCount === 1
     },
     async deletePost(id: string): Promise<boolean> {
-        const post = await this.getPostById(id);
+        const result = await postsCollection.deleteOne({id})
 
-        if (post) {
-            const index = db.posts.indexOf(post);
-            db.posts.splice(index, 1);
-            return true
-        } else {
-            return false
-        }
+        return result.deletedCount === 1
     }
 }

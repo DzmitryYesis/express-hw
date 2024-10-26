@@ -1,9 +1,9 @@
-import {db, TDataBase} from '../../db';
+import {blogsCollection, postsCollection} from '../../db';
+
 
 export const testingRepository = {
-    deleteAllData() {
-        Object.keys(db).forEach((key) => {
-            db[key as keyof TDataBase] = []
-        })
+   async deleteAllData() {
+        await blogsCollection.deleteMany({})
+        await postsCollection.deleteMany({})
     }
 }

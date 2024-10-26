@@ -1,12 +1,29 @@
-import {db, TBlog} from '../../db';
+import {blogsCollection, TBlog} from '../../db';
 import {TInputBlog} from './types';
 
 export const blogsRepository = {
     async getBlogs(): Promise<TBlog[]> {
-        return db.blogs
+        const blogs = await blogsCollection.find().toArray();
+
+        return blogs.map(b => ({
+            id: b.id,
+            name: b.name,
+            description: b.description,
+            websiteUrl: b.websiteUrl
+        }))
     },
-    async getBlogById(id: string): Promise<TBlog | undefined> {
-        return db.blogs.find(b => b.id === id)
+    async getBlogById(id: string): Promise<TBlog | null> {
+        const blog = await blogsCollection.findOne({id});
+
+        if (blog) {
+            return {
+                id: blog.id,
+                name: blog.name,
+                description: blog.description,
+                websiteUrl: blog.websiteUrl
+            }
+        }
+        return null
     },
     async createBlog(data: TInputBlog): Promise<TBlog> {
         const newBlog = {
@@ -14,29 +31,23 @@ export const blogsRepository = {
             ...data
         }
 
-        db.blogs.push(newBlog);
+        await blogsCollection.insertOne(newBlog)
 
-        return newBlog
+        return {
+            id: newBlog.id,
+            name: newBlog.name,
+            description: newBlog.description,
+            websiteUrl: newBlog.websiteUrl
+        }
     },
     async updateBlogById(id: string, data: TInputBlog): Promise<boolean> {
-        const blog = await this.getBlogById(id);
+        const result = await blogsCollection.updateOne({id}, {$set: {...data}})
 
-        if (blog) {
-            db.blogs = db.blogs.map(b => b.id === id ? {...b, ...data} : b)
-            return true
-        } else {
-            return false
-        }
+        return result.matchedCount === 1
     },
     async deleteBlog(id: string): Promise<boolean> {
-        const blog = await this.getBlogById(id);
+        const result = await blogsCollection.deleteOne({id})
 
-        if (blog) {
-            const index = db.blogs.indexOf(blog);
-            db.blogs.splice(index, 1);
-            return true
-        } else {
-            return false
-        }
+        return result.deletedCount === 1
     }
 }
