@@ -1,4 +1,4 @@
-import {blogsCollection, postsCollection, TPost} from '../../db';
+import {postsCollection, TPost} from '../../db';
 import {TInputPost} from '../blogs/types';
 import {ObjectId, OptionalId} from 'mongodb';
 
@@ -33,30 +33,18 @@ export const postsRepository = {
 
         return null
     },
-    async createPost(data: TInputPost): Promise<TPost> {
-        const blog = await blogsCollection.findOne({_id: new ObjectId(data.blogId)})
+    async createPost(data: Omit<TPost, 'id'>): Promise<TPost> {
+        const result = await postsCollection.insertOne(data as OptionalId<TPost>);
 
-        if (blog) {
-            const newPost: Omit<TPost, 'id'> = {
-                blogName: blog.name,
-                createdAt: new Date().toISOString(),
-                ...data
-            }
-
-           const result = await postsCollection.insertOne(newPost as OptionalId<TPost>);
-
-            return {
-                id: result.insertedId.toString(),
-                title: newPost.title,
-                content: newPost.content,
-                shortDescription: newPost.shortDescription,
-                blogName: newPost.blogName,
-                blogId: newPost.blogId,
-                createdAt: newPost.createdAt
-            };
-        }
-
-        throw new Error('Oops!')
+        return {
+            id: result.insertedId.toString(),
+            title: data.title,
+            content: data.content,
+            shortDescription: data.shortDescription,
+            blogName: data.blogName,
+            blogId: data.blogId,
+            createdAt: data.createdAt
+        };
     },
     async updatePostById(id: string, data: TInputPost): Promise<boolean> {
         const result = await postsCollection.updateOne({_id: new ObjectId(id)}, {$set: {...data}})
