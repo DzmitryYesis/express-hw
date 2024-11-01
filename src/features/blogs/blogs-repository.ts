@@ -31,22 +31,16 @@ export const blogsRepository = {
 
         return null
     },
-    async createBlog(data: TInputBlog): Promise<TBlog> {
-        const newBlog: Omit<TBlog, 'id'> = {
-            createdAt: new Date().toISOString(),
-            isMembership: false,
-            ...data
-        }
-
-        const result = await blogsCollection.insertOne(newBlog as OptionalId<TBlog>);
+    async createBlog(data: Omit<TBlog, 'id'>): Promise<TBlog> {
+        const result = await blogsCollection.insertOne(data as OptionalId<TBlog>);
 
         return {
             id: result.insertedId.toString(),
-            name: newBlog.name,
-            description: newBlog.description,
-            websiteUrl: newBlog.websiteUrl,
-            createdAt: newBlog.createdAt,
-            isMembership: newBlog.isMembership
+            name: data.name,
+            description: data.description,
+            websiteUrl: data.websiteUrl,
+            createdAt: data.createdAt,
+            isMembership: data.isMembership
         }
     },
     async updateBlogById(id: string, data: TInputBlog): Promise<boolean> {

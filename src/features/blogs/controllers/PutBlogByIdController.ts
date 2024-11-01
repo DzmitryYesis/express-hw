@@ -1,13 +1,13 @@
 import {Response} from 'express';
 import {RequestWithParamAndBody} from '../../../types';
 import {TInputBlog} from '../types';
-import {blogsRepository} from '../blogs-repository';
 import {StatusCodeEnum} from '../../../constants';
+import {blogsService} from "../blog-service";
 
 export const PutBlogByIdController = async (req: RequestWithParamAndBody<{
     id: string
 }, TInputBlog>, res: Response) => {
-    const isUpdateBlog = await blogsRepository.updateBlogById(req.params.id, req.body);
+    const isUpdateBlog = await blogsService.updateBlogById(req.params.id, req.body);
 
     if (isUpdateBlog) {
         res.status(StatusCodeEnum.NO_CONTENT_204).end()
