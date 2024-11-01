@@ -20,9 +20,6 @@ describe('test CRUD flow for posts', () => {
             client = new MongoClient(uri);
             await client.connect();
 
-            const db = client.db();
-             db.collection('ваша-коллекция');
-
             await req.delete(SETTINGS.PATH.TESTING).expect(StatusCodeEnum.NO_CONTENT_204)
         })
 
