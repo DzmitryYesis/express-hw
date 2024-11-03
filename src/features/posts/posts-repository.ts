@@ -1,20 +1,33 @@
 import {postsCollection, TPost} from '../../db';
-import {TInputPost} from '../blogs/types';
+import {TInputPost, TPostsQuery, TResponseWithPagination} from '../types';
 import {ObjectId, OptionalId} from 'mongodb';
 
 export const postsRepository = {
-    async getPosts(): Promise<TPost[]> {
-        const posts = await postsCollection.find().toArray();
+    async getPosts(queryData: TPostsQuery): Promise<TResponseWithPagination<TPost[]>> {
+        const posts = await postsCollection
+            .find({})
+            .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? 1 : -1})
+            .skip((+queryData.pageNumber - 1) * +queryData.pageSize)
+            .limit(+queryData.pageSize)
+            .toArray();
 
-        return posts.map(p => ({
-            id: p._id.toString(),
-            title: p.title,
-            content: p.content,
-            shortDescription: p.shortDescription,
-            blogName: p.blogName,
-            blogId: p.blogId,
-            createdAt: p.createdAt
-        }))
+        const totalCount = await this.postsCount();
+
+        return {
+            pagesCount: Math.ceil(totalCount / +queryData.pageSize),
+            page: +queryData.pageNumber,
+            pageSize: +queryData.pageSize,
+            totalCount,
+            item: posts.map(p => ({
+                id: p._id.toString(),
+                title: p.title,
+                content: p.content,
+                shortDescription: p.shortDescription,
+                blogName: p.blogName,
+                blogId: p.blogId,
+                createdAt: p.createdAt
+            }))
+        }
     },
     async getPostById(id: string): Promise<TPost | null> {
         const post = await postsCollection.findOne({_id: new ObjectId(id)});
@@ -55,5 +68,8 @@ export const postsRepository = {
         const result = await postsCollection.deleteOne({_id: new ObjectId(id)})
 
         return result.deletedCount === 1
+    },
+    async postsCount(): Promise<number> {
+        return await postsCollection.countDocuments({})
     }
 }

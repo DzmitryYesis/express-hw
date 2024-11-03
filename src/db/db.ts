@@ -16,7 +16,7 @@ export const postsCollection = db.collection<TPost>(SETTINGS.DB_COLLECTION_POSTS
 export const connectToDB = async () => {
     try {
         await client.connect()
-        console.log('connected to db')
+        console.log(`connected to db: ${mongoURI}`)
         await client.db('incubator').command({ping: 1})
         return true
     } catch (e) {

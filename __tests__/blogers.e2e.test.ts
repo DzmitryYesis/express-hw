@@ -3,7 +3,7 @@ import {SETTINGS} from '../src/settings';
 import {StatusCodeEnum} from '../src/constants';
 import {blogForTest} from './dataset';
 import {TBlog} from '../src/db';
-import {TErrorMessage, TInputBlog} from '../src/features/blogs/types';
+import {TErrorMessage, TInputBlog} from '../src/features/types';
 import {MongoMemoryServer} from 'mongodb-memory-server';
 import {MongoClient} from 'mongodb';
 
