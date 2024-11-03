@@ -7,7 +7,7 @@ export const blogsRepository = {
         const blogs = await blogsCollection
             .find(queryData.searchNameTerm ? {name: {$regex: queryData.searchNameTerm, $options: 'i'}} : {})
             .collation({ locale: 'en', strength: 3 })
-            .sort({[queryData.sortBy]: queryData.sortDirection === 'desc' ? 1 : -1})
+            .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? 1 : -1})
             .skip((+queryData.pageNumber - 1) * +queryData.pageSize)
             .limit(+queryData.pageSize)
             .toArray();

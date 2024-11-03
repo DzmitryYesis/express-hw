@@ -7,7 +7,7 @@ export const postsRepository = {
         const posts = await postsCollection
             .find({})
             .collation({ locale: 'en', strength: 2 })
-            .sort({[queryData.sortBy]: queryData.sortDirection === 'desc' ? 1 : -1})
+            .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? 1 : -1})
             .skip((+queryData.pageNumber - 1) * +queryData.pageSize)
             .limit(+queryData.pageSize)
             .toArray();
