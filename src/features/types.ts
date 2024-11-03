@@ -42,5 +42,5 @@ export type TResponseWithPagination<T> = {
     page: number,
     pageSize: number,
     totalCount: number,
-    item: T
+    items: T
 }

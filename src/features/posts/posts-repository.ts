@@ -18,7 +18,7 @@ export const postsRepository = {
             page: +queryData.pageNumber,
             pageSize: +queryData.pageSize,
             totalCount,
-            item: posts.map(p => ({
+            items: posts.map(p => ({
                 id: p._id.toString(),
                 title: p.title,
                 content: p.content,
