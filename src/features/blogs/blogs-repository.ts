@@ -6,7 +6,7 @@ export const blogsRepository = {
     async getBlogs(queryData: TBlogsQuery): Promise<TResponseWithPagination<TBlog[]>> {
         const blogs = await blogsCollection
             .find(queryData.searchNameTerm ? {name: {$regex: queryData.searchNameTerm, $options: 'i'}} : {})
-            .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? 1 : -1})
+            .sort({[queryData.sortBy]: queryData.sortDirection})
             .skip((+queryData.pageNumber - 1) * +queryData.pageSize)
             .limit(+queryData.pageSize)
             .toArray();
@@ -25,7 +25,7 @@ export const blogsRepository = {
                 websiteUrl: b.websiteUrl,
                 createdAt: b.createdAt,
                 isMembership: b.isMembership
-            })).reverse(),
+            })),
         }
     },
     async getBlogById(id: string): Promise<TBlog | null> {
