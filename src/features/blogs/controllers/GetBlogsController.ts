@@ -1,10 +1,13 @@
-import {Request, Response} from 'express';
+import {Response} from 'express';
 import {TBlog} from '../../../db';
 import {StatusCodeEnum} from '../../../constants';
 import {blogsService} from "../blog-service";
+import {RequestWithQuery} from "../../../types";
+import {TBlogsQuery, TResponseWithPagination} from "../../types";
+import {formatQueryData} from "../../../utils";
 
-export const GetBlogsController = async (req: Request, res: Response<TBlog[]>) => {
-    const blogs = await blogsService.getBlogs()
+export const GetBlogsController = async (req: RequestWithQuery<TBlogsQuery>, res: Response) => {
+    const blogs = await blogsService.getBlogs(formatQueryData(req.query) as TBlogsQuery) as TResponseWithPagination<TBlog[]>
 
     res
         .status(StatusCodeEnum.OK_200)

@@ -1,5 +1,6 @@
-import {body} from 'express-validator';
+import {body, query} from 'express-validator';
 import {blogsRepository} from '../../blogs';
+import {querySortBy} from "../../../constants/query";
 
 export const postTitleValidator = body('title')
     .trim()
@@ -34,3 +35,10 @@ export const postBlogIdValidator = body('blogId')
                     throw new Error('Blog not found')
             }
     })
+
+export const posts = [
+    query('sortBy').trim().optional().isIn(querySortBy.posts),
+    query('sortDirection').trim().optional().isIn(['asc', 'desc']),
+    query('pageNumber').trim().optional().toInt().isInt(),
+    query('pageSize').trim().optional().toInt().isInt()
+]

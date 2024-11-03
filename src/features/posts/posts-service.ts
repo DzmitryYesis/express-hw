@@ -1,11 +1,11 @@
 import {TPost} from "../../db";
-import {TInputPost} from "../blogs/types";
+import {TInputPost, TPostsQuery, TResponseWithPagination} from "../types";
 import {postsRepository} from "./posts-repository";
 import {blogsRepository} from "../blogs";
 
 export const postsService = {
-    async getPosts(): Promise<TPost[]> {
-        return await postsRepository.getPosts();
+    async getPosts(queryData: TPostsQuery): Promise<TResponseWithPagination<TPost[]>> {
+        return await postsRepository.getPosts(queryData);
     },
     async getPostById(id: string): Promise<TPost | null> {
         return await postsRepository.getPostById(id);

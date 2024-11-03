@@ -1,5 +1,7 @@
 import {Request} from 'express';
 
-export type RequestWithParam<T> = Request<T>;
-export type RequestWithBody<T> = Request<{}, {}, T>
-export type RequestWithParamAndBody<T, B> = Request<T, {}, B>;
+export type RequestWithParam<P> = Request<P>;
+export type RequestWithBody<B> = Request<{}, {}, B>;
+export type RequestWithParamAndBody<P, B> = Request<P, {}, B>;
+export type RequestWithQuery<Q> = Request<{}, {}, {}, Q>;
+export type RequestWithParamAndQuery<P, Q> = Request<P, {}, {}, Q>;

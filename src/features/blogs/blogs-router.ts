@@ -4,18 +4,24 @@ import {
     GetBlogByIdController,
     GetBlogsController,
     PostBlogController,
-    PutBlogByIdController
+    PutBlogByIdController,
+    GetPostsForBlogByIdController, PostNewPostForBlogByIdController
 } from './controllers';
-import {authBasicMiddleware, inputCheckErrorsMiddleware} from '../../global-middlewares';
+import {authBasicMiddleware, inputCheckErrorsMiddleware, queryFieldsMiddleware} from '../../global-middlewares';
 import {
-    blogDescriptionValidator,
-    blogNameValidator,
+    blogDescriptionValidator, blogIdValidator,
+    blogNameValidator, blogs,
     blogWebsiteUrlValidator
-} from './middlewares/index';
+} from './middlewares';
+import {postContentValidator, posts, postShortDescriptionValidator, postTitleValidator} from "../posts/middlewares";
 
 export const blogsRouter = Router();
 
-blogsRouter.get('/', GetBlogsController);
+blogsRouter.get('/',
+    ...blogs,
+    queryFieldsMiddleware,
+    GetBlogsController
+);
 blogsRouter.post('/',
     authBasicMiddleware,
     blogNameValidator,
@@ -24,6 +30,22 @@ blogsRouter.post('/',
     inputCheckErrorsMiddleware,
     PostBlogController)
 blogsRouter.get('/:id', GetBlogByIdController);
+blogsRouter.get('/:id/posts',
+    blogIdValidator,
+    ...posts,
+    queryFieldsMiddleware,
+    inputCheckErrorsMiddleware,
+    GetPostsForBlogByIdController
+    )
+blogsRouter.post('/:id/posts',
+    authBasicMiddleware,
+    blogIdValidator,
+    postTitleValidator,
+    postShortDescriptionValidator,
+    postContentValidator,
+    inputCheckErrorsMiddleware,
+    PostNewPostForBlogByIdController,
+)
 blogsRouter.put('/:id',
     authBasicMiddleware,
     blogNameValidator,

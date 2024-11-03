@@ -6,17 +6,21 @@ import {
     PostNewPostController,
     PutPostByIdController
 } from './controllers';
-import {authBasicMiddleware, inputCheckErrorsMiddleware} from '../../global-middlewares';
+import {authBasicMiddleware, inputCheckErrorsMiddleware, queryFieldsMiddleware} from '../../global-middlewares';
 import {
     postBlogIdValidator,
-    postContentValidator,
+    postContentValidator, posts,
     postShortDescriptionValidator,
     postTitleValidator
 } from './middlewares';
 
 export const postsRouter = Router();
 
-postsRouter.get('/', GetPostsController);
+postsRouter.get('/',
+    ...posts,
+    queryFieldsMiddleware,
+    GetPostsController
+);
 postsRouter.post('/',
     authBasicMiddleware,
     postTitleValidator,
