@@ -14,7 +14,7 @@ export const blogsService = {
     async getPostForBlogById(id: string, queryData: TPostsQuery): Promise<TResponseWithPagination<TPost[]> | null> {
         const blog = await blogsRepository.getBlogById(id);
         if (blog) {
-            return await blogsRepository.getPostForBlogById(id, queryData);
+            return await blogsRepository.getPostForBlogById(blog.id, queryData);
         }
         return blog;
     },
