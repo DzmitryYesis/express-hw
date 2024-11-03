@@ -6,7 +6,7 @@ export const postsRepository = {
     async getPosts(queryData: TPostsQuery): Promise<TResponseWithPagination<TPost[]>> {
         const posts = await postsCollection
             .find({})
-            .sort({[queryData.sortBy]: queryData.sortDirection})
+            .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? 1 : -1})
             .skip((+queryData.pageNumber - 1) * +queryData.pageSize)
             .limit(+queryData.pageSize)
             .toArray();
