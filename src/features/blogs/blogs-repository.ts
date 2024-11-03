@@ -6,8 +6,7 @@ export const blogsRepository = {
     async getBlogs(queryData: TBlogsQuery): Promise<TResponseWithPagination<TBlog[]>> {
         const blogs = await blogsCollection
             .find(queryData.searchNameTerm ? {name: {$regex: queryData.searchNameTerm, $options: 'i'}} : {})
-            .collation({ locale: "en", strength: 1 })
-            .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? 1 : -1})
+            .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? -1 : 1})
             .skip((+queryData.pageNumber - 1) * +queryData.pageSize)
             .limit(+queryData.pageSize)
             .toArray();
