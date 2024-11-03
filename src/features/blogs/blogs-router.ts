@@ -34,7 +34,6 @@ blogsRouter.get('/:id/posts',
     blogIdValidator,
     ...posts,
     queryFieldsMiddleware,
-    inputCheckErrorsMiddleware,
     GetPostsForBlogByIdController
     )
 blogsRouter.post('/:id/posts',
