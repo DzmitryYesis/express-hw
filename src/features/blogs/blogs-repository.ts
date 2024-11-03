@@ -18,7 +18,7 @@ export const blogsRepository = {
             page: +queryData.pageNumber,
             pageSize: +queryData.pageSize,
             totalCount,
-            item: blogs.map(b => ({
+            items: blogs.map(b => ({
                 id: b._id.toString(),
                 name: b.name,
                 description: b.description,
@@ -59,7 +59,7 @@ export const blogsRepository = {
             page: +queryData.pageNumber,
             pageSize: +queryData.pageSize,
             totalCount,
-            item: posts.map(p => ({
+            items: posts.map(p => ({
                 id: p._id.toString(),
                 title: p.title,
                 content: p.content,

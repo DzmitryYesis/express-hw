@@ -1,6 +1,5 @@
 import {body, param, query} from 'express-validator';
 import {querySortBy} from "../../../constants/query";
-import {blogsRepository} from "../blogs-repository";
 
 export const blogNameValidator = body('name')
     .trim()
@@ -31,12 +30,6 @@ export const blogIdValidator = param('id')
     .withMessage('Must be a string')
     .isMongoId()
     .withMessage('ID must be a valid MongoDB ObjectId')
-    .custom(async (id) => {
-        const blog =  await blogsRepository.getBlogById(id);
-        if (!blog) {
-            throw new Error('Blog not found')
-        }
-    })
 
 export const blogs = [
     query('searchNameTerm').trim().optional().isString(),
