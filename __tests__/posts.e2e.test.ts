@@ -35,7 +35,7 @@ describe('test CRUD flow for posts', () => {
 
             console.log(res.body)
 
-            expect(res.body.length).toBe(0);
+            expect(res.body.items.length).toBe(0);
         })
 
         it('should return error for authorization', async () => {
@@ -103,7 +103,7 @@ describe('test CRUD flow for posts', () => {
                 blogName: blog1.name,
                 createdAt: expect.any(String)
             } as TPost);
-            expect(resGet.body.length).toBe(1);
+            expect(resGet.body.items.length).toBe(1);
         })
 
 
@@ -123,8 +123,8 @@ describe('test CRUD flow for posts', () => {
 
             console.log(res.body)
 
-            expect(res.body.length).toBe(2);
-            expect(res.body[1]).toEqual({
+            expect(res.body.items.length).toBe(2);
+            expect(res.body.items[1]).toEqual({
                 id: expect.any(String),
                 ...postForTest,
                 blogId: blog1.id,
@@ -166,10 +166,10 @@ describe('test CRUD flow for posts', () => {
                 .get(SETTINGS.PATH.POSTS)
                 .expect(StatusCodeEnum.OK_200)
 
-            const updatePost = res.body.find((p: TPost) => p.id === post1.id);
-            const notUpdatePost = res.body.find((p: TPost) => p.id === post2.id);
+            const updatePost = res.body.items.find((p: TPost) => p.id === post1.id);
+            const notUpdatePost = res.body.items.find((p: TPost) => p.id === post2.id);
 
-            expect(res.body.length).toBe(2);
+            expect(res.body.items.length).toBe(2);
             expect(updatePost).toEqual({
                 id: post1.id,
                 blogName: post1.blogName,
@@ -196,10 +196,10 @@ describe('test CRUD flow for posts', () => {
                 .get(SETTINGS.PATH.POSTS)
                 .expect(StatusCodeEnum.OK_200)
 
-            const deletedPost = res.body.find((p: TPost) => p.id === post1.id);
-            const notDeletedPost = res.body.find((p: TPost) => p.id === post2.id);
+            const deletedPost = res.body.items.find((p: TPost) => p.id === post1.id);
+            const notDeletedPost = res.body.items.find((p: TPost) => p.id === post2.id);
 
-            expect(res.body.length).toBe(1);
+            expect(res.body.items.length).toBe(1);
             expect(deletedPost).toBeUndefined();
             expect(notDeletedPost).toEqual(post2);
         })

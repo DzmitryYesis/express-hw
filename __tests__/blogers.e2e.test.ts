@@ -35,7 +35,7 @@ describe('test CRUD flow for blogs', () => {
 
             console.log(res.body)
 
-            expect(res.body.length).toBe(0);
+            expect(res.body.items.length).toBe(0);
         })
 
         it('should return error for authorization', async () => {
@@ -93,7 +93,7 @@ describe('test CRUD flow for blogs', () => {
                 createdAt: expect.any(String),
                 ...blogForTest
             } as TBlog);
-            expect(resGet.body.length).toBe(1);
+            expect(resGet.body.items.length).toBe(1);
         })
 
         let blog2: TBlog;
@@ -112,8 +112,8 @@ describe('test CRUD flow for blogs', () => {
 
             console.log(res.body)
 
-            expect(res.body.length).toBe(2);
-            expect(res.body[1]).toEqual(blog2);
+            expect(res.body.items.length).toBe(2);
+            expect(res.body.items[0]).toEqual(blog2);
         })
 
         it('shouldn\'t update blog with id = blog1.id', async () => {
@@ -147,10 +147,10 @@ describe('test CRUD flow for blogs', () => {
                 .get(SETTINGS.PATH.BLOGS)
                 .expect(StatusCodeEnum.OK_200)
 
-            const updateBlog = res.body.find((b: TBlog) => b.id === blog1.id);
-            const notUpdateBlog = res.body.find((b: TBlog) => b.id === blog2.id);
+            const updateBlog = res.body.items.find((b: TBlog) => b.id === blog1.id);
+            const notUpdateBlog = res.body.items.find((b: TBlog) => b.id === blog2.id);
 
-            expect(res.body.length).toBe(2);
+            expect(res.body.items.length).toBe(2);
             expect(updateBlog).toEqual({
                 id: blog1.id,
                 createdAt: blog1.createdAt,
@@ -177,10 +177,10 @@ describe('test CRUD flow for blogs', () => {
                 .get(SETTINGS.PATH.BLOGS)
                 .expect(StatusCodeEnum.OK_200)
 
-            const deletedBlog = res.body.find((b: TBlog) => b.id === blog1.id);
-            const notDeletedBlog = res.body.find((b: TBlog) => b.id === blog2.id);
+            const deletedBlog = res.body.items.find((b: TBlog) => b.id === blog1.id);
+            const notDeletedBlog = res.body.items.find((b: TBlog) => b.id === blog2.id);
 
-            expect(res.body.length).toBe(1);
+            expect(res.body.items.length).toBe(1);
             expect(deletedBlog).toBeUndefined();
             expect(notDeletedBlog).toEqual(blog2);
         })
