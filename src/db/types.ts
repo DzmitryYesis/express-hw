@@ -1,3 +1,5 @@
+import {ObjectId} from "mongodb";
+
 export type TBlog = {
     id: string,
     name: string,
@@ -15,4 +17,20 @@ export type TPost = {
     blogId: string,
     blogName: string,
     createdAt: string,
+}
+
+export type TUser = {
+    id: string,
+    login: string,
+    email: string,
+    createdAt: string
+}
+
+export type TUserDB = {
+    _id: ObjectId,
+    login: string,
+    email: string,
+    createdAt: string
+    passwordHash: string,
+    salt: string,
 }

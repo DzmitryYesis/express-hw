@@ -11,7 +11,12 @@ export const blogsRepository = {
             .limit(+queryData.pageSize)
             .toArray();
 
-        const totalCount = await blogsCollection.countDocuments(queryData.searchNameTerm ? {name: {$regex: queryData.searchNameTerm, $options: 'i'}} : {});
+        const totalCount = await blogsCollection.countDocuments(queryData.searchNameTerm ? {
+            name: {
+                $regex: queryData.searchNameTerm,
+                $options: 'i'
+            }
+        } : {});
 
         return {
             pagesCount: Math.ceil(totalCount / +queryData.pageSize),
@@ -91,8 +96,5 @@ export const blogsRepository = {
         const result = await blogsCollection.deleteOne({_id: new ObjectId(id)})
 
         return result.deletedCount === 1
-    },
-    async blogsCount(): Promise<number> {
-        return await blogsCollection.countDocuments({})
     }
 }

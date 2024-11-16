@@ -1,4 +1,4 @@
-import {TBlog, TPost} from './types';
+import {TBlog, TPost, TUserDB} from './types';
 import {MongoClient} from 'mongodb';
 import {SETTINGS} from '../settings';
 import dotenv from 'dotenv'
@@ -11,6 +11,7 @@ export const client: MongoClient = new MongoClient(mongoURI)
 const db = client.db();
 export const blogsCollection = db.collection<TBlog>(SETTINGS.DB_COLLECTION_BLOGS_NAME);
 export const postsCollection = db.collection<TPost>(SETTINGS.DB_COLLECTION_POSTS_NAME);
+export const usersCollection = db.collection<TUserDB>(SETTINGS.DB_COLLECTION_USERS_NAME);
 
 // проверка подключения к бд
 export const connectToDB = async () => {
