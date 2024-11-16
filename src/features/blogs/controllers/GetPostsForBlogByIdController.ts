@@ -1,14 +1,14 @@
 import {RequestWithParamAndQuery} from "../../../types";
 import {TPostsQuery} from "../../types";
 import {blogsService} from "../blog-service";
-import {formatQueryData} from "../../../utils";
+import {formatQueryPostsData} from "../../../utils";
 import {StatusCodeEnum} from "../../../constants";
 import {Response} from 'express';
 
 export const GetPostsForBlogByIdController = async (req: RequestWithParamAndQuery<{
     id: string
 }, TPostsQuery>, res: Response) => {
-    const posts = await blogsService.getPostForBlogById(req.params.id, formatQueryData(req.query) as TPostsQuery);
+    const posts = await blogsService.getPostForBlogById(req.params.id, formatQueryPostsData(req.query) as TPostsQuery);
 
     if (posts) {
         res

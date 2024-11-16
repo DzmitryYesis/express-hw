@@ -16,5 +16,10 @@ export const querySortBy = {
         "blogName",
         "createdAt"
     ],
+    users: [
+        "login",
+        "email",
+        "createdAt"
+    ]
 }
 
