@@ -1,4 +1,4 @@
-import {RequestWithQuery} from "../../../types";
+import {RequestWithQuery} from "../../../types/requestTypes";
 import {TResponseWithPagination, TUsersQuery} from "../../types";
 import {TUser} from "../../../db";
 import {StatusCodeEnum} from "../../../constants";

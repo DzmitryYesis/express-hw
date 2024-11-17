@@ -2,7 +2,7 @@ import {Response} from 'express';
 import {TBlog} from '../../../db';
 import {StatusCodeEnum} from '../../../constants';
 import {blogsService} from "../blog-service";
-import {RequestWithQuery} from "../../../types";
+import {RequestWithQuery} from "../../../types/requestTypes";
 import {TBlogsQuery, TResponseWithPagination} from "../../types";
 import {formatQueryBlogsData} from "../../../utils";
 

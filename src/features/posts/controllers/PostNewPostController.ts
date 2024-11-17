@@ -1,4 +1,4 @@
-import {RequestWithBody} from '../../../types';
+import {RequestWithBody} from '../../../types/requestTypes';
 import {TInputPost, TOutPutErrorsType} from '../../types';
 import {Response} from 'express';
 import {TPost} from '../../../db';

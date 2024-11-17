@@ -1,6 +1,6 @@
 import {app} from './app';
 import {SETTINGS} from './settings';
-import {connectToDB} from './db/index';
+import {connectToDB} from './db';
 
 const startApp = async () => {
     await connectToDB()

@@ -1,5 +1,5 @@
-import {postsCollection, TPost} from '../../db';
-import {TInputPost, TPostsQuery, TResponseWithPagination} from '../types';
+import {commentsCollection, postsCollection, TComment, TPost} from '../../db';
+import {TCommentsQuery, TInputPost, TPostsQuery, TResponseWithPagination} from '../types';
 import {ObjectId, OptionalId} from 'mongodb';
 
 export const postsRepository = {
@@ -45,6 +45,29 @@ export const postsRepository = {
         }
 
         return null
+    },
+    async getCommentsForPostById(id: string, queryData: TCommentsQuery): Promise<TResponseWithPagination<TComment[]>> {
+        const comments = await commentsCollection
+            .find({postId: id})
+            .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? 1 : -1})
+            .skip((+queryData.pageNumber - 1) * +queryData.pageSize)
+            .limit(+queryData.pageSize)
+            .toArray();
+
+        const totalCount = await commentsCollection.countDocuments({postId: id});
+
+        return {
+            pagesCount: Math.ceil(totalCount / +queryData.pageSize),
+            page: +queryData.pageNumber,
+            pageSize: +queryData.pageSize,
+            totalCount,
+            items: comments.map(c => ({
+                id: c._id.toString(),
+                content: c.content,
+                commentatorInfo: c.commentatorInfo,
+                createdAt: c.createdAt
+            }))
+        }
     },
     async createPost(data: Omit<TPost, 'id'>): Promise<TPost> {
         const result = await postsCollection.insertOne(data as OptionalId<TPost>);

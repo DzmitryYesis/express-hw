@@ -20,6 +20,10 @@ export const querySortBy = {
         "login",
         "email",
         "createdAt"
+    ],
+    comments: [
+        "content",
+        "createdAt"
     ]
 }
 

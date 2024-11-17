@@ -7,6 +7,9 @@ export const usersService = {
     async getUsers(queryData: TUsersQuery): Promise<TResponseWithPagination<TUser[]>> {
         return await usersRepository.getUsers(queryData);
     },
+    async getUserById(id: string) {
+        return await usersRepository.getUserById(id);
+    },
     async createUser(data: TInputUser): Promise<TUser> {
 
         const salt = await bcrypt.genSalt(10);
@@ -25,14 +28,14 @@ export const usersService = {
     async deleteUser(id: string): Promise<boolean> {
         return await usersRepository.deleteUser(id);
     },
-    async checkCredentials(loginOrEmail: string, password: string): Promise<boolean> {
+    async checkCredentials(loginOrEmail: string, password: string): Promise<TUserDB | null> {
         const user = await usersRepository.findByLoginOrEmail(loginOrEmail);
 
-        if (!user) return false;
-
+        if (!user) return null;
         const passwordHash = await this._passwordHash(password, user.salt);
+        if (passwordHash !== user.passwordHash) return null;
 
-        return passwordHash === user.passwordHash;
+        return user;
     },
     async _findLogin(login: string) {
         return await usersRepository._findLogin(login);

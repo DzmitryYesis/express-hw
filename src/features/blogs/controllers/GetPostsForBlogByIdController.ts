@@ -1,4 +1,4 @@
-import {RequestWithParamAndQuery} from "../../../types";
+import {RequestWithParamAndQuery} from "../../../types/requestTypes";
 import {TPostsQuery} from "../../types";
 import {blogsService} from "../blog-service";
 import {formatQueryPostsData} from "../../../utils";

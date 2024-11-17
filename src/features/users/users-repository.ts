@@ -1,5 +1,5 @@
 import {TResponseWithPagination, TUsersQuery} from "../types";
-import {TUser, TUserDB, usersCollection} from "../../db";
+import {TPersonalData, TUser, TUserDB, usersCollection} from "../../db";
 import {ObjectId, OptionalId} from "mongodb";
 
 export const usersRepository = {
@@ -36,6 +36,19 @@ export const usersRepository = {
             })),
         }
     },
+    async getUserById(id: string): Promise<TPersonalData | null> {
+        const user = await usersCollection.findOne({_id: new ObjectId(id)});
+
+        if (user) {
+            return {
+                login: user.login,
+                email: user.email,
+                userId: user._id.toString(),
+            }
+        }
+
+        return null;
+    },
     async createUser(data: Omit<TUserDB, '_id'>): Promise<TUser> {
         //TODO fix type problem
         // @ts-ignore
@@ -54,7 +67,7 @@ export const usersRepository = {
         return result.deletedCount === 1
     },
     async findByLoginOrEmail(loginOrEmail: string) {
-      return await usersCollection.findOne({$or: [{email: loginOrEmail}, {login: loginOrEmail}]})
+        return await usersCollection.findOne({$or: [{email: loginOrEmail}, {login: loginOrEmail}]})
     },
     async _findLogin(login: string) {
         return await usersCollection.findOne({login: login});

@@ -1,4 +1,4 @@
-import {RequestWithParamAndBody} from "../../../types";
+import {RequestWithParamAndBody} from "../../../types/requestTypes";
 import {TInputPost, TOutPutErrorsType} from "../../types";
 import {Response} from "express";
 import {TPost} from "../../../db";
@@ -17,5 +17,4 @@ export const PostNewPostForBlogByIdController = async (req: RequestWithParamAndB
     } else {
         res.status(StatusCodeEnum.NOT_FOUND_404).end()
     }
-
 }

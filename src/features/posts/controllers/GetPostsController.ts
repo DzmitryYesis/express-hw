@@ -2,7 +2,7 @@ import {Response} from 'express';
 import {TPost} from '../../../db';
 import {StatusCodeEnum} from '../../../constants';
 import {postsService} from "../posts-service";
-import {RequestWithQuery} from "../../../types";
+import {RequestWithQuery} from "../../../types/requestTypes";
 import {TPostsQuery, TResponseWithPagination} from "../../types";
 import {formatQueryPostsData} from "../../../utils";
 

@@ -1,5 +1,6 @@
 import {
     TBlogsQuery,
+    TCommentsQuery,
     TPostsQuery,
     TUsersQuery
 } from "../features/types";
@@ -36,6 +37,17 @@ export const formatQueryUsersData = (data: TUsersQuery): TUsersQuery => {
         pageNumber: '1',
         pageSize: '10'
     } as TUsersQuery;
+
+    return {...defaultQuery, ...data};
+}
+
+export const formatQueryCommentsData = (data: TCommentsQuery): TCommentsQuery => {
+    const defaultQuery = {
+        sortBy: "createdAt",
+        sortDirection: 'desc',
+        pageNumber: '1',
+        pageSize: '10'
+    } as TCommentsQuery;
 
     return {...defaultQuery, ...data};
 }
