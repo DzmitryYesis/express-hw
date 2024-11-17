@@ -1,5 +1,5 @@
 import {Response} from 'express';
-import {RequestWithParamAndBody} from '../../../types';
+import {RequestWithParamAndBody} from '../../../types/requestTypes';
 import {TInputBlog} from '../../types';
 import {StatusCodeEnum} from '../../../constants';
 import {blogsService} from "../blog-service";

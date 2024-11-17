@@ -1,4 +1,4 @@
-import {TBlog, TPost, TUser} from "../db";
+import {TBlog, TComment, TPost, TUser} from "../db";
 
 export type TInputBlog = {
     name: string;
@@ -22,6 +22,10 @@ export type TInputUser = {
 export type TInputAuth = {
     loginOrEmail: string,
     password: string,
+}
+
+export type TInputComment = {
+    content: string,
 }
 
 export type TOutPutErrorsType = {
@@ -52,6 +56,13 @@ export type TUsersQuery = {
     searchLoginTerm: string | null;
     searchEmailTerm: string | null;
     sortBy: keyof TUser;
+    sortDirection: 'asc' | 'desc';
+    pageNumber: string;
+    pageSize: string;
+}
+
+export type TCommentsQuery = {
+    sortBy: keyof TComment;
     sortDirection: 'asc' | 'desc';
     pageNumber: string;
     pageSize: string;

@@ -1,5 +1,5 @@
 import {Response} from 'express';
-import {RequestWithBody} from "../../../types";
+import {RequestWithBody} from "../../../types/requestTypes";
 import {TErrorMessage, TInputUser, TOutPutErrorsType} from "../../types";
 import {TUser} from "../../../db";
 import {usersService} from "../users-service";

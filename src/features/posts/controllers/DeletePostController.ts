@@ -1,4 +1,4 @@
-import {RequestWithParam} from '../../../types';
+import {RequestWithParam} from '../../../types/requestTypes';
 import {Response} from 'express';
 import {StatusCodeEnum} from '../../../constants';
 import {postsService} from "../posts-service";

@@ -1,4 +1,4 @@
-import {body, query} from 'express-validator';
+import {body, param, query} from 'express-validator';
 import {blogsRepository} from '../../blogs';
 import {querySortBy} from "../../../constants/query";
 
@@ -23,6 +23,13 @@ export const postContentValidator = body('content')
     .isLength({min: 1, max: 100})
     .withMessage('Length must be from 1 to 100')
 
+export const postIdValidator = param('id')
+    .trim()
+    .isString()
+    .withMessage('Must be a string')
+    .isMongoId()
+    .withMessage('ID must be a valid MongoDB ObjectId')
+
 export const postBlogIdValidator = body('blogId')
     .trim()
     .isString()
@@ -30,10 +37,10 @@ export const postBlogIdValidator = body('blogId')
     .isLength({min: 1})
     .withMessage('Min length must be 1')
     .custom(async (blogId) => {
-        const blog =  await blogsRepository.getBlogById(blogId);
-            if (!blog) {
-                    throw new Error('Blog not found')
-            }
+        const blog = await blogsRepository.getBlogById(blogId);
+        if (!blog) {
+            throw new Error('Blog not found')
+        }
     })
 
 export const posts = [

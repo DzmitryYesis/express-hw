@@ -1,5 +1,5 @@
 import {Response} from 'express';
-import {RequestWithParamAndBody} from '../../../types';
+import {RequestWithParamAndBody} from '../../../types/requestTypes';
 import {TInputPost} from '../../types';
 import {StatusCodeEnum} from '../../../constants';
 import {postsService} from "../posts-service";
