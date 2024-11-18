@@ -1,86 +1,14 @@
-import {commentsCollection, postsCollection, TComment, TPost} from '../../db';
-import {TCommentsQuery, TInputPost, TPostsQuery, TResponseWithPagination} from '../types';
+import {postsCollection} from '../../db';
+import {TInputPost, TPost} from '../../types';
 import {ObjectId, OptionalId} from 'mongodb';
 
 export const postsRepository = {
-    async getPosts(queryData: TPostsQuery): Promise<TResponseWithPagination<TPost[]>> {
-        const posts = await postsCollection
-            .find({})
-            .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? 1 : -1})
-            .skip((+queryData.pageNumber - 1) * +queryData.pageSize)
-            .limit(+queryData.pageSize)
-            .toArray();
-
-        const totalCount = await this.postsCount();
-
-        return {
-            pagesCount: Math.ceil(totalCount / +queryData.pageSize),
-            page: +queryData.pageNumber,
-            pageSize: +queryData.pageSize,
-            totalCount,
-            items: posts.map(p => ({
-                id: p._id.toString(),
-                title: p.title,
-                content: p.content,
-                shortDescription: p.shortDescription,
-                blogName: p.blogName,
-                blogId: p.blogId,
-                createdAt: p.createdAt
-            }))
-        }
-    },
-    async getPostById(id: string): Promise<TPost | null> {
-        const post = await postsCollection.findOne({_id: new ObjectId(id)});
-
-        if (post) {
-            return {
-                id: post._id.toString(),
-                title: post.title,
-                content: post.content,
-                shortDescription: post.shortDescription,
-                blogName: post.blogName,
-                blogId: post.blogId,
-                createdAt: post.createdAt
-            }
-        }
-
-        return null
-    },
-    async getCommentsForPostById(id: string, queryData: TCommentsQuery): Promise<TResponseWithPagination<TComment[]>> {
-        const comments = await commentsCollection
-            .find({postId: id})
-            .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? 1 : -1})
-            .skip((+queryData.pageNumber - 1) * +queryData.pageSize)
-            .limit(+queryData.pageSize)
-            .toArray();
-
-        const totalCount = await commentsCollection.countDocuments({postId: id});
-
-        return {
-            pagesCount: Math.ceil(totalCount / +queryData.pageSize),
-            page: +queryData.pageNumber,
-            pageSize: +queryData.pageSize,
-            totalCount,
-            items: comments.map(c => ({
-                id: c._id.toString(),
-                content: c.content,
-                commentatorInfo: c.commentatorInfo,
-                createdAt: c.createdAt
-            }))
-        }
-    },
-    async createPost(data: Omit<TPost, 'id'>): Promise<TPost> {
+    async createPost(data: Omit<TPost, 'id'>): Promise<string> {
+        //TODO fix problem with type
+        // @ts-ignore
         const result = await postsCollection.insertOne(data as OptionalId<TPost>);
 
-        return {
-            id: result.insertedId.toString(),
-            title: data.title,
-            content: data.content,
-            shortDescription: data.shortDescription,
-            blogName: data.blogName,
-            blogId: data.blogId,
-            createdAt: data.createdAt
-        };
+        return result.insertedId.toString();
     },
     async updatePostById(id: string, data: TInputPost): Promise<boolean> {
         const result = await postsCollection.updateOne({_id: new ObjectId(id)}, {$set: {...data}})
@@ -91,8 +19,5 @@ export const postsRepository = {
         const result = await postsCollection.deleteOne({_id: new ObjectId(id)})
 
         return result.deletedCount === 1
-    },
-    async postsCount(): Promise<number> {
-        return await postsCollection.countDocuments({})
     }
 }

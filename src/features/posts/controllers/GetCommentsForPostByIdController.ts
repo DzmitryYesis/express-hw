@@ -1,16 +1,17 @@
-import {RequestWithParamAndQuery} from "../../../types/requestTypes";
-import {TCommentsQuery} from "../../types";
+import {TCommentsQuery, RequestWithParamAndQuery, TResponseWithPagination, TComment} from "../../../types";
 import {Response} from "express";
 import {formatQueryCommentsData} from "../../../utils";
 import {StatusCodeEnum} from "../../../constants";
-import {postsService} from "../posts-service";
+import {queryPostsRepository} from "../query-posts-repository";
 
 export const GetCommentsForPostByIdController = async (req: RequestWithParamAndQuery<{
     id: string
-}, TCommentsQuery>, res: Response) => {
-    const comments = await postsService.getCommentsForPostById(req.params.id, formatQueryCommentsData(req.query) as TCommentsQuery);
+}, TCommentsQuery>, res: Response<TResponseWithPagination<TComment[]>>) => {
+    const post = await queryPostsRepository.getPostById(req.params.id);
 
-    if (comments) {
+    if (post) {
+        const comments = await queryPostsRepository.getCommentsForPostById(req.params.id, formatQueryCommentsData(req.query) as TCommentsQuery);
+
         res
             .status(StatusCodeEnum.OK_200)
             .json(comments)

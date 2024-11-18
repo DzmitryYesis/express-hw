@@ -1,58 +1,32 @@
-import {TComment, TCommentDB, TPost} from "../../db";
-import {TCommentsQuery, TInputComment, TInputPost, TPostsQuery, TResponseWithPagination} from "../types";
+import {TInputComment, TInputPost, TPost, TBlog} from "../../types";
+import {TCommentDB} from "../../db";
 import {postsRepository} from "./posts-repository";
-import {blogsRepository} from "../blogs";
-import {usersRepository} from "../users";
+import {queryUsersRepository} from "../users";
 import {commentsRepository} from "../comments";
 
 export const postsService = {
-    async getPosts(queryData: TPostsQuery): Promise<TResponseWithPagination<TPost[]>> {
-        return await postsRepository.getPosts(queryData);
-    },
-    async getPostById(id: string): Promise<TPost | null> {
-        return await postsRepository.getPostById(id);
-    },
-    async getCommentsForPostById(id: string, queryData: TCommentsQuery): Promise<TResponseWithPagination<TComment[]> | null> {
-        const post = await postsRepository.getPostById(id);
-        if (post) {
-            return await postsRepository.getCommentsForPostById(post.id, queryData);
-        }
-        return post;
-    },
-    async createPost(data: TInputPost): Promise<TPost> {
-        const blog = await blogsRepository.getBlogById(data.blogId);
-
-        if (blog) {
-            const newPost: Omit<TPost, 'id'> = {
-                blogName: blog.name,
-                createdAt: new Date().toISOString(),
-                ...data
-            }
-
-            return await postsRepository.createPost(newPost);
+    async createPost(data: TInputPost, blog: TBlog): Promise<string> {
+        const newPost: Omit<TPost, 'id'> = {
+            blogName: blog.name,
+            createdAt: new Date().toISOString(),
+            ...data
         }
 
-        throw new Error('Oops!')
+        return await postsRepository.createPost(newPost);
     },
-    async createCommentForPost(id: string, data: TInputComment, userId: string): Promise<TComment | null> {
-        const post = await postsRepository.getPostById(id);
-
-        if (post) {
-            const personalData = await usersRepository.getUserById(userId);
-            const newComment: Omit<TCommentDB, '_id'> = {
-                commentatorInfo: {
-                    userId: personalData!.userId,
-                    userLogin: personalData!.login,
-                },
-                createdAt: new Date().toISOString(),
-                postId: post.id,
-                ...data
-            }
-
-            return await commentsRepository.createComment(newComment);
+    async createCommentForPost(id: string, data: TInputComment, userId: string): Promise<string> {
+        const personalData = await queryUsersRepository.getUserById(userId);
+        const newComment: Omit<TCommentDB, '_id'> = {
+            commentatorInfo: {
+                userId: personalData!.id,
+                userLogin: personalData!.login,
+            },
+            createdAt: new Date().toISOString(),
+            postId: id,
+            ...data
         }
 
-        return post
+        return await commentsRepository.createComment(newComment);
     },
     async updatePostById(id: string, data: TInputPost): Promise<boolean> {
         return await postsRepository.updatePostById(id, data)

@@ -1,5 +1,5 @@
 import {body, param, query} from 'express-validator';
-import {querySortBy} from "../../../constants/query";
+import {querySortBy} from "../../../constants";
 
 export const blogNameValidator = body('name')
     .trim()
@@ -31,7 +31,7 @@ export const blogIdValidator = param('id')
     .isMongoId()
     .withMessage('ID must be a valid MongoDB ObjectId')
 
-export const blogs = [
+export const blogQueriesValidator = [
     query('searchNameTerm').trim().optional().isString(),
     query('sortBy').trim().optional().isIn(querySortBy.blogs),
     query('sortDirection').trim().optional().isIn(['asc', 'desc']),

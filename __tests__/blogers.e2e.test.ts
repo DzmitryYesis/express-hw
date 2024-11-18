@@ -2,8 +2,7 @@ import {req} from './test-helper';
 import {SETTINGS} from '../src/settings';
 import {StatusCodeEnum} from '../src/constants';
 import {blogForTest} from './dataset';
-import {TBlog} from '../src/db';
-import {TErrorMessage, TInputBlog} from '../src/features/types';
+import {TErrorMessage, TInputBlog, TBlog} from '../src/types';
 import {MongoMemoryServer} from 'mongodb-memory-server';
 import {MongoClient} from 'mongodb';
 

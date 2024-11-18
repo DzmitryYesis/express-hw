@@ -13,7 +13,7 @@ import {
 import {
     DeleteUserController,
     GetUsersController,
-    PostUserController
+    CreateUserController
 } from "./controllers";
 
 export const usersRouter = Router();
@@ -30,7 +30,7 @@ usersRouter.post('/',
     userPasswordValidator,
     userEmailValidator,
     inputCheckErrorsMiddleware,
-    PostUserController
+    CreateUserController
 );
 
 usersRouter.delete('/:id', authBasicMiddleware, DeleteUserController)

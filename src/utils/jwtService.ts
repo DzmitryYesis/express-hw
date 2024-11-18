@@ -12,7 +12,7 @@ type TJWTVerify = {
 
 export const jwtService = {
     async createJWT(user: TUserDB) {
-        return jwt.sign({userId: user._id}, SETTINGS.JWT_SECRET, {expiresIn: '10m'});
+        return jwt.sign({userId: user._id}, SETTINGS.JWT_SECRET, {expiresIn: SETTINGS.JWT_EXPIRES_TIME});
     },
     async getUserIdByToken(token: string) {
         try {

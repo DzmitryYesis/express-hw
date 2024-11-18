@@ -1,11 +1,10 @@
 import {Response} from 'express';
-import {RequestWithBody} from "../../../types/requestTypes";
-import {TInputAuth} from "../../types";
-import {usersService} from "../../users/users-service";
+import {RequestWithBody, TInputAuth} from "../../../types";
+import {usersService} from "../../users";
 import {StatusCodeEnum} from "../../../constants";
 import {jwtService} from "../../../utils";
 
-export const AuthController = async (req: RequestWithBody<TInputAuth>, res: Response) => {
+export const AuthController = async (req: RequestWithBody<TInputAuth>, res: Response<{ accessToken: string }>) => {
     const user = await usersService.checkCredentials(req.body.loginOrEmail, req.body.password);
 
     if (user) {

@@ -3,7 +3,7 @@ import {
     TCommentsQuery,
     TPostsQuery,
     TUsersQuery
-} from "../features/types";
+} from "../types";
 
 export const formatQueryBlogsData = (data: TBlogsQuery): TBlogsQuery => {
     const defaultQuery = {

@@ -1,19 +1,13 @@
-import {TInputUser, TResponseWithPagination, TUsersQuery} from "../types";
-import {TUser, TUserDB} from "../../db";
-import {usersRepository} from "./users-repository";
+import {TInputUser} from "../../types";
 import bcrypt from "bcrypt";
+import {TUserDB} from "../../db";
+import {usersRepository} from "./users-repository";
 
 export const usersService = {
-    async getUsers(queryData: TUsersQuery): Promise<TResponseWithPagination<TUser[]>> {
-        return await usersRepository.getUsers(queryData);
-    },
-    async getUserById(id: string) {
-        return await usersRepository.getUserById(id);
-    },
-    async createUser(data: TInputUser): Promise<TUser> {
+    async createUser(data: TInputUser): Promise<string> {
 
         const salt = await bcrypt.genSalt(10);
-        const passwordHash = await this._passwordHash(data.password, salt)
+        const passwordHash = await this.createPasswordHash(data.password, salt)
 
         const newUser: Omit<TUserDB, '_id'> = {
             email: data.email,
@@ -29,21 +23,21 @@ export const usersService = {
         return await usersRepository.deleteUser(id);
     },
     async checkCredentials(loginOrEmail: string, password: string): Promise<TUserDB | null> {
-        const user = await usersRepository.findByLoginOrEmail(loginOrEmail);
+        const user = await usersRepository.findUserByLoginOrEmail(loginOrEmail);
 
         if (!user) return null;
-        const passwordHash = await this._passwordHash(password, user.salt);
+        const passwordHash = await this.createPasswordHash(password, user.salt);
         if (passwordHash !== user.passwordHash) return null;
 
         return user;
     },
-    async _findLogin(login: string) {
-        return await usersRepository._findLogin(login);
+    async findUserByLogin(login: string): Promise<TUserDB | null> {
+        return await usersRepository.findUserByLogin(login);
     },
-    async _findEmail(email: string) {
-        return await usersRepository._findEmail(email);
+    async findUserByEmail(email: string): Promise<TUserDB | null> {
+        return await usersRepository.findUserByEmail(email);
     },
-    async _passwordHash(password: string, salt: string): Promise<string> {
+    async createPasswordHash(password: string, salt: string): Promise<string> {
         return await bcrypt.hash(password, salt);
     }
 }

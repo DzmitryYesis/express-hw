@@ -1,6 +1,6 @@
 import {Router, Request, Response} from 'express';
-import {testingRepository} from './testing-repository';
 import {StatusCodeEnum} from '../../constants';
+import {testingRepository} from "./testing-repository";
 
 export const testingRouter = Router();
 

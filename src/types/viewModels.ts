@@ -1,7 +1,5 @@
-import {ObjectId} from "mongodb";
-
-export type TBlogDB = {
-    _id: ObjectId,
+export type TBlog = {
+    id: string,
     name: string,
     description: string,
     websiteUrl: string,
@@ -9,8 +7,8 @@ export type TBlogDB = {
     isMembership: boolean
 }
 
-export type TPostDB = {
-    _id: ObjectId,
+export type TPost = {
+    id: string,
     title: string,
     shortDescription: string,
     content: string,
@@ -19,22 +17,25 @@ export type TPostDB = {
     createdAt: string,
 }
 
-export type TUserDB = {
-    _id: ObjectId,
+export type TUser = {
+    id: string,
     login: string,
     email: string,
     createdAt: string
-    passwordHash: string,
-    salt: string,
 }
 
-export type TCommentDB = {
-    _id: ObjectId,
+export type TPersonalData = {
+    email: string,
+    login: string,
+    userId: string,
+}
+
+export type TComment = {
+    id: string,
     content: string,
     commentatorInfo: {
         userId: string,
-        userLogin: string,
+        userLogin: string
     },
-    postId: string,
-    createdAt: string,
+    createdAt: string
 }

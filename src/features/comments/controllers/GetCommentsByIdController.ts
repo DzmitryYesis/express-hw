@@ -1,11 +1,10 @@
-import {RequestWithParam} from "../../../types/requestTypes";
+import {RequestWithParam, TComment} from "../../../types";
 import {Response} from "express";
-import {TComment} from "../../../db";
 import {StatusCodeEnum} from "../../../constants";
-import {commentsService} from "../comments-service";
+import {queryCommentsRepository} from "../query-comments-repository";
 
 export const GetCommentsByIdController = async (req: RequestWithParam<{ id: string }>, res: Response<TComment>) => {
-    const comment = await commentsService.getCommentById(req.params.id)
+    const comment = await queryCommentsRepository.getCommentById(req.params.id)
     if (comment) {
         res
             .status(StatusCodeEnum.OK_200)

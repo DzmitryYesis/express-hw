@@ -1,10 +1,9 @@
 import {Response} from 'express';
-import {RequestWithParamAndBody} from '../../../types/requestTypes';
-import {TInputPost} from '../../types';
+import {TInputPost, RequestWithParamAndBody} from '../../../types';
 import {StatusCodeEnum} from '../../../constants';
 import {postsService} from "../posts-service";
 
-export const PutPostByIdController = async (req: RequestWithParamAndBody<{
+export const UpdatePostByIdController = async (req: RequestWithParamAndBody<{
     id: string
 }, TInputPost>, res: Response) => {
     const isUpdatePost = await postsService.updatePostById(req.params.id, req.body);

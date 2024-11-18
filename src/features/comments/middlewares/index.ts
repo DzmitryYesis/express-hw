@@ -1,5 +1,5 @@
 import {body, query} from "express-validator";
-import {querySortBy} from "../../../constants/query";
+import {querySortBy} from "../../../constants";
 
 export const comments = [
     query('sortBy').trim().optional().isIn(querySortBy.comments),

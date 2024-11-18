@@ -1,11 +1,10 @@
-import {RequestWithParam} from '../../../types/requestTypes';
+import {RequestWithParam, TBlog} from '../../../types';
 import {Response} from 'express';
-import {TBlog} from '../../../db';
 import {StatusCodeEnum} from '../../../constants/';
-import {blogsService} from "../blog-service";
+import {queryBlogsRepository} from "../query-blogs-repository";
 
 export const GetBlogByIdController = async (req: RequestWithParam<{ id: string }>, res: Response<TBlog>) => {
-    const blog = await blogsService.getBlogById(req.params.id)
+    const blog = await queryBlogsRepository.getBlogById(req.params.id)
     if (blog) {
         res
             .status(StatusCodeEnum.OK_200)
