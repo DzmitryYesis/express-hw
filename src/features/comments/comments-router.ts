@@ -1,6 +1,13 @@
 import {Router} from "express";
-import {DeleteCommentByIdController, GetCommentsByIdController, UpdateCommentByIdController} from "./controllers";
-import {authBearerMiddleware, inputCheckErrorsMiddleware} from "../../global-middlewares";
+import {
+    DeleteCommentByIdController,
+    GetCommentsByIdController,
+    UpdateCommentByIdController
+} from "./controllers";
+import {
+    authBearerMiddleware,
+    inputCheckErrorsMiddleware
+} from "../../global-middlewares";
 import {commentContentValidator} from "./middlewares";
 
 export const commentsRouter = Router();

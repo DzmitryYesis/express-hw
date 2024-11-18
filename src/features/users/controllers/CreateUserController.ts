@@ -1,13 +1,12 @@
 import {Response} from 'express';
-import {RequestWithBody} from "../../../types/requestTypes";
-import {TErrorMessage, TInputUser, TOutPutErrorsType} from "../../types";
-import {TUser} from "../../../db";
-import {usersService} from "../users-service";
+import {RequestWithBody, TErrorMessage, TInputUser, TOutPutErrorsType, TUser} from "../../../types";
 import {StatusCodeEnum} from "../../../constants";
+import {usersService} from "../users-service";
+import {queryUsersRepository} from "../query-users-repository";
 
-export const PostUserController = async (req: RequestWithBody<TInputUser>, res: Response<TUser | TOutPutErrorsType>) => {
-    const isLogin = await usersService._findLogin(req.body.login);
-    const isEmail = await usersService._findEmail(req.body.email);
+export const CreateUserController = async (req: RequestWithBody<TInputUser>, res: Response<TUser | TOutPutErrorsType>) => {
+    const isLogin = await usersService.findUserByLogin(req.body.login);
+    const isEmail = await usersService.findUserByEmail(req.body.email);
 
     const errors: TErrorMessage[] = [];
 
@@ -29,8 +28,9 @@ export const PostUserController = async (req: RequestWithBody<TInputUser>, res: 
         return
     }
 
-    const newUser = await usersService.createUser(req.body);
+    const newUserId = await usersService.createUser(req.body);
+    const newUser = await queryUsersRepository.getUserById(newUserId);
     res
         .status(StatusCodeEnum.CREATED_201)
-        .json(newUser);
+        .json(newUser!);
 }

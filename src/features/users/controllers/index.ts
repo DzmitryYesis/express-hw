@@ -1,3 +1,3 @@
 export * from './GetUsersController';
-export * from './PostUserController';
+export * from './CreateUserController';
 export * from './DeleteUserController';

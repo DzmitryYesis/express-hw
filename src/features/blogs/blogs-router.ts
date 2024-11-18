@@ -3,22 +3,34 @@ import {
     DeleteBlogController,
     GetBlogByIdController,
     GetBlogsController,
-    PostBlogController,
-    PutBlogByIdController,
-    GetPostsForBlogByIdController, PostNewPostForBlogByIdController
+    CreateBlogController,
+    UpdateBlogByIdController,
+    GetPostsForBlogByIdController,
+    CreateNewPostForBlogByIdController
 } from './controllers';
-import {authBasicMiddleware, inputCheckErrorsMiddleware, queryFieldsMiddleware} from '../../global-middlewares';
 import {
-    blogDescriptionValidator, blogIdValidator,
-    blogNameValidator, blogs,
+    authBasicMiddleware,
+    inputCheckErrorsMiddleware,
+    queryFieldsMiddleware
+} from '../../global-middlewares';
+import {
+    blogDescriptionValidator,
+    blogIdValidator,
+    blogNameValidator,
+    blogQueriesValidator,
     blogWebsiteUrlValidator
 } from './middlewares';
-import {postContentValidator, posts, postShortDescriptionValidator, postTitleValidator} from "../posts/middlewares";
+import {
+    postContentValidator,
+    postsQueriesValidator,
+    postShortDescriptionValidator,
+    postTitleValidator
+} from "../posts/middlewares";
 
 export const blogsRouter = Router();
 
 blogsRouter.get('/',
-    ...blogs,
+    ...blogQueriesValidator,
     queryFieldsMiddleware,
     GetBlogsController
 );
@@ -28,14 +40,14 @@ blogsRouter.post('/',
     blogDescriptionValidator,
     blogWebsiteUrlValidator,
     inputCheckErrorsMiddleware,
-    PostBlogController)
+    CreateBlogController)
 blogsRouter.get('/:id', GetBlogByIdController);
 blogsRouter.get('/:id/posts',
     blogIdValidator,
-    ...posts,
+    ...postsQueriesValidator,
     queryFieldsMiddleware,
     GetPostsForBlogByIdController
-    )
+)
 blogsRouter.post('/:id/posts',
     authBasicMiddleware,
     blogIdValidator,
@@ -43,7 +55,7 @@ blogsRouter.post('/:id/posts',
     postShortDescriptionValidator,
     postContentValidator,
     inputCheckErrorsMiddleware,
-    PostNewPostForBlogByIdController,
+    CreateNewPostForBlogByIdController,
 )
 blogsRouter.put('/:id',
     authBasicMiddleware,
@@ -51,5 +63,5 @@ blogsRouter.put('/:id',
     blogDescriptionValidator,
     blogWebsiteUrlValidator,
     inputCheckErrorsMiddleware,
-    PutBlogByIdController);
+    UpdateBlogByIdController);
 blogsRouter.delete('/:id', authBasicMiddleware, DeleteBlogController);

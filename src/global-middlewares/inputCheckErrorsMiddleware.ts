@@ -1,6 +1,6 @@
 import {NextFunction, Response, Request} from 'express';
 import {validationResult} from 'express-validator';
-import {TOutPutErrorsType} from '../features/types';
+import {TOutPutErrorsType} from '../types';
 import {StatusCodeEnum} from '../constants';
 
 export const inputCheckErrorsMiddleware = (req: Request, res: Response<TOutPutErrorsType>, next: NextFunction) => {

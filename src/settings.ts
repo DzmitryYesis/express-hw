@@ -5,6 +5,7 @@ config()
 export const SETTINGS = {
     PORT: process.env.PORT,
     JWT_SECRET: process.env.JWT_SECRET || 'qwerqwer',
+    JWT_EXPIRES_TIME: '10m',
     PATH: {
         BLOGS: '/blogs',
         POSTS: '/posts',

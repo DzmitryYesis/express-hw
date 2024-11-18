@@ -1,4 +1,4 @@
-import {TInputBlog, TInputPost} from '../src/features/types';
+import {TInputBlog, TInputPost} from '../src/types';
 
 export const blogForTest: TInputBlog = {
     name: 'Dzmitry 1 Test',

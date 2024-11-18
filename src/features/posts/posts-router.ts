@@ -5,8 +5,8 @@ import {
     GetCommentsForPostByIdController,
     GetPostByIdController,
     GetPostsController,
-    PostNewPostController,
-    PutPostByIdController
+    CreatePostController,
+    UpdatePostByIdController
 } from './controllers';
 import {
     authBasicMiddleware,
@@ -18,7 +18,7 @@ import {
     postBlogIdValidator,
     postContentValidator,
     postIdValidator,
-    posts,
+    postsQueriesValidator,
     postShortDescriptionValidator,
     postTitleValidator
 } from './middlewares';
@@ -27,7 +27,7 @@ import {commentContentValidator, comments} from "../comments";
 export const postsRouter = Router();
 
 postsRouter.get('/',
-    ...posts,
+    ...postsQueriesValidator,
     queryFieldsMiddleware,
     GetPostsController
 );
@@ -38,7 +38,7 @@ postsRouter.post('/',
     postContentValidator,
     postBlogIdValidator,
     inputCheckErrorsMiddleware,
-    PostNewPostController)
+    CreatePostController)
 postsRouter.get('/:id', GetPostByIdController);
 postsRouter.get('/:id/comments',
     postIdValidator,
@@ -60,5 +60,5 @@ postsRouter.put('/:id',
     postContentValidator,
     postBlogIdValidator,
     inputCheckErrorsMiddleware,
-    PutPostByIdController);
+    UpdatePostByIdController);
 postsRouter.delete('/:id', authBasicMiddleware, DeletePostController);

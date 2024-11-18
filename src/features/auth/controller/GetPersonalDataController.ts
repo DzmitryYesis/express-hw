@@ -1,11 +1,12 @@
 import {Request, Response} from "express";
-import {usersService} from "../../users/users-service";
+import {queryUsersRepository} from "../../users";
 import {StatusCodeEnum} from "../../../constants";
+import {TPersonalData} from "../../../types";
 
-export const GetPersonalDataController = async (req: Request, res: Response) => {
-    const personalData = await usersService.getUserById(req.userId!);
+export const GetPersonalDataController = async (req: Request, res: Response<TPersonalData>) => {
+    const personalData = await queryUsersRepository.getUserPersonalData(req.userId!);
 
     res
         .status(StatusCodeEnum.OK_200)
-        .json(personalData);
+        .json(personalData!);
 }

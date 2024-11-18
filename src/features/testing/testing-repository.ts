@@ -1,6 +1,5 @@
 import {blogsCollection, commentsCollection, postsCollection, usersCollection} from '../../db';
 
-
 export const testingRepository = {
     async deleteAllData() {
         await blogsCollection.deleteMany({});
