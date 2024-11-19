@@ -22,5 +22,8 @@ export const usersRepository = {
     },
     async findUserByEmail(email: string): Promise<TUserDB | null> {
         return await usersCollection.findOne({email: email});
+    },
+    async findUserById(id: string): Promise<TUserDB | null> {
+        return await usersCollection.findOne({_id: new ObjectId(id)});
     }
 }

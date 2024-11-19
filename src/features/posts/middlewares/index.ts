@@ -1,6 +1,6 @@
 import {body, param, query} from 'express-validator';
 import {querySortBy} from "../../../constants";
-import {queryBlogsRepository} from "../../blogs";
+import {blogsService} from "../../blogs";
 
 export const postTitleValidator = body('title')
     .trim()
@@ -37,7 +37,7 @@ export const postBlogIdValidator = body('blogId')
     .isLength({min: 1})
     .withMessage('Min length must be 1')
     .custom(async (blogId) => {
-        const blog = await queryBlogsRepository.getBlogById(blogId);
+        const blog = await blogsService.findBlogById(blogId);
         if (!blog) {
             throw new Error('Blog not found')
         }

@@ -1,11 +1,14 @@
-import {TInputComment, TInputPost, TPost, TBlog} from "../../types";
-import {TCommentDB} from "../../db";
+import {TInputComment, TInputPost, TPost} from "../../types";
+import {TBlogDB, TCommentDB, TPostDB} from "../../db";
 import {postsRepository} from "./posts-repository";
-import {queryUsersRepository} from "../users";
+import {usersService} from "../users";
 import {commentsRepository} from "../comments";
 
 export const postsService = {
-    async createPost(data: TInputPost, blog: TBlog): Promise<string> {
+    async findPostById(id: string): Promise<TPostDB | null> {
+        return await postsRepository.findPostById(id);
+    },
+    async createPost(data: TInputPost, blog: TBlogDB): Promise<string> {
         const newPost: Omit<TPost, 'id'> = {
             blogName: blog.name,
             createdAt: new Date().toISOString(),
@@ -15,10 +18,10 @@ export const postsService = {
         return await postsRepository.createPost(newPost);
     },
     async createCommentForPost(id: string, data: TInputComment, userId: string): Promise<string> {
-        const personalData = await queryUsersRepository.getUserById(userId);
+        const personalData = await usersService.findUserById(userId);
         const newComment: Omit<TCommentDB, '_id'> = {
             commentatorInfo: {
-                userId: personalData!.id,
+                userId: personalData!._id.toString(),
                 userLogin: personalData!.login,
             },
             createdAt: new Date().toISOString(),

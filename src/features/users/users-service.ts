@@ -37,6 +37,9 @@ export const usersService = {
     async findUserByEmail(email: string): Promise<TUserDB | null> {
         return await usersRepository.findUserByEmail(email);
     },
+    async findUserById(id: string): Promise<TUserDB | null> {
+        return await usersRepository.findUserById(id);
+    },
     async createPasswordHash(password: string, salt: string): Promise<string> {
         return await bcrypt.hash(password, salt);
     }

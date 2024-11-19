@@ -1,4 +1,4 @@
-import {blogsCollection} from '../../db';
+import {blogsCollection, TBlogDB} from '../../db';
 import {TBlog, TInputBlog} from '../../types';
 import {ObjectId, OptionalId} from 'mongodb';
 
@@ -9,6 +9,9 @@ export const blogsRepository = {
         const result = await blogsCollection.insertOne(data as OptionalId<TBlog>);
 
         return result.insertedId.toString();
+    },
+    async findBlogById(id: string): Promise<TBlogDB | null> {
+        return await blogsCollection.findOne({_id: new ObjectId(id)});
     },
     async updateBlogById(id: string, data: TInputBlog): Promise<boolean> {
         const result = await blogsCollection.updateOne({_id: new ObjectId(id)}, {$set: {...data}})

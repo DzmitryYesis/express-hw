@@ -10,6 +10,9 @@ export const commentsRepository = {
 
         return result.insertedId.toString();
     },
+    async findCommentById(id: string): Promise<TCommentDB | null> {
+        return await commentsCollection.findOne({_id: new ObjectId(id)});
+    },
     async updateCommentById(id: string, data: TInputComment): Promise<boolean> {
         const result = await commentsCollection.updateOne({_id: new ObjectId(id)}, {$set: {...data}})
 

@@ -1,4 +1,4 @@
-import {postsCollection} from '../../db';
+import {postsCollection, TPostDB} from '../../db';
 import {TInputPost, TPost} from '../../types';
 import {ObjectId, OptionalId} from 'mongodb';
 
@@ -9,6 +9,9 @@ export const postsRepository = {
         const result = await postsCollection.insertOne(data as OptionalId<TPost>);
 
         return result.insertedId.toString();
+    },
+    async findPostById(id: string): Promise<TPostDB | null> {
+        return await postsCollection.findOne({_id: new ObjectId(id)});
     },
     async updatePostById(id: string, data: TInputPost): Promise<boolean> {
         const result = await postsCollection.updateOne({_id: new ObjectId(id)}, {$set: {...data}})

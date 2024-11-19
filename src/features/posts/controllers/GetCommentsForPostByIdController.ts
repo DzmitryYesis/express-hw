@@ -3,11 +3,12 @@ import {Response} from "express";
 import {formatQueryCommentsData} from "../../../utils";
 import {StatusCodeEnum} from "../../../constants";
 import {queryPostsRepository} from "../query-posts-repository";
+import {postsService} from "../posts-service";
 
 export const GetCommentsForPostByIdController = async (req: RequestWithParamAndQuery<{
     id: string
 }, TCommentsQuery>, res: Response<TResponseWithPagination<TComment[]>>) => {
-    const post = await queryPostsRepository.getPostById(req.params.id);
+    const post = await postsService.findPostById(req.params.id);
 
     if (post) {
         const comments = await queryPostsRepository.getCommentsForPostById(req.params.id, formatQueryCommentsData(req.query) as TCommentsQuery);

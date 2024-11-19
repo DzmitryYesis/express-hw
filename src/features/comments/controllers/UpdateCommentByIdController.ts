@@ -1,13 +1,12 @@
 import {TInputComment, RequestWithParamAndBody} from "../../../types";
 import {Response} from "express";
 import {StatusCodeEnum} from "../../../constants";
-import {queryCommentsRepository} from "../query-comments-repository";
 import {commentsService} from "../comments-service";
 
 export const UpdateCommentByIdController = async (req: RequestWithParamAndBody<{
     id: string
 }, TInputComment>, res: Response) => {
-    const comment = await queryCommentsRepository.getCommentById(req.params.id);
+    const comment = await commentsService.findCommentById(req.params.id);
 
     if (!comment) {
         res.status(StatusCodeEnum.NOT_FOUND_404).end();
