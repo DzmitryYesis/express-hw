@@ -37,8 +37,8 @@ export const postBlogIdValidator = body('blogId')
     .isLength({min: 1})
     .withMessage('Min length must be 1')
     .custom(async (blogId) => {
-        const blog = await blogsService.findBlogById(blogId);
-        if (!blog) {
+        const {result} = await blogsService.findBlogById(blogId);
+        if (result === "SUCCESS") {
             throw new Error('Blog not found')
         }
     })
