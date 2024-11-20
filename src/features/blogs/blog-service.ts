@@ -23,12 +23,13 @@ export const blogsService = {
 
         return createServiceResultObj<string>("SUCCESS", "CREATED", insertedId);
     },
-    async createPostForBlog(blogId: string, data: TInputPost): Promise<TResultServiceObj<string>> {
+    async createPostForBlog(blogId: string, data: Omit<TInputPost, 'blogId'>): Promise<TResultServiceObj<string>> {
         const {result, status, data: findBlogByIdData} = await this.findBlogById(blogId);
 
         if (result === "SUCCESS" ) {
             const newPost: Omit<TPost, 'id'> = {
                 blogName: findBlogByIdData!.name,
+                blogId: blogId,
                 createdAt: new Date().toISOString(),
                 ...data
             }
