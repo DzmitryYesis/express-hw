@@ -1,22 +1,20 @@
 import {TInputComment, RequestWithParamAndBody} from "../../../types";
 import {Response} from "express";
-import {StatusCodeEnum} from "../../../constants";
 import {commentsService} from "../comments-service";
+import {HttpStatusCodeEnum} from "../../../constants";
 
 export const UpdateCommentByIdController = async (req: RequestWithParamAndBody<{
     id: string
 }, TInputComment>, res: Response) => {
-    const comment = await commentsService.findCommentById(req.params.id);
+    const {result, status} = await commentsService.updateCommentById(req.userId!, req.params.id, req.body);
 
-    if (!comment) {
-        res.status(StatusCodeEnum.NOT_FOUND_404).end();
-    } else if (comment.commentatorInfo.userId !== req.userId!) {
-        res.status(StatusCodeEnum.FORBIDDEN_403).end();
+    if (result === "SUCCESS") {
+        res.status(HttpStatusCodeEnum.NO_CONTENT_204).end();
     } else {
-        const isUpdateComment = await commentsService.updateCommentById(req.params.id, req.body);
-
-        if (isUpdateComment) {
-            res.status(StatusCodeEnum.NO_CONTENT_204).end()
+        if (status === "FORBIDDEN") {
+            res.status(HttpStatusCodeEnum.FORBIDDEN_403).end();
+        } else {
+            res.status(HttpStatusCodeEnum.NOT_FOUND_404).end();
         }
     }
 }

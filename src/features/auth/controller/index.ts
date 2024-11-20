@@ -1,2 +1,2 @@
-export * from './AuthController';
+export * from './LoginController';
 export * from './GetPersonalDataController';

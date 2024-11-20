@@ -1,16 +1,16 @@
 import {Response} from 'express';
 import {RequestWithParamAndBody, TInputBlog} from '../../../types';
-import {StatusCodeEnum} from '../../../constants';
 import {blogsService} from "../blog-service";
+import {HttpStatusCodeEnum} from "../../../constants";
 
 export const UpdateBlogByIdController = async (req: RequestWithParamAndBody<{
     id: string
 }, TInputBlog>, res: Response) => {
-    const isUpdateBlog = await blogsService.updateBlogById(req.params.id, req.body);
+    const {result} = await blogsService.updateBlogById(req.params.id, req.body);
 
-    if (isUpdateBlog) {
-        res.status(StatusCodeEnum.NO_CONTENT_204).end()
+    if (result === "SUCCESS") {
+        res.status(HttpStatusCodeEnum.NO_CONTENT_204).end()
     } else {
-        res.status(StatusCodeEnum.NOT_FOUND_404).end()
+        res.status(HttpStatusCodeEnum.NOT_FOUND_404).end()
     }
 }

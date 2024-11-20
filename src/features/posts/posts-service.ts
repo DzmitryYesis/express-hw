@@ -1,40 +1,75 @@
-import {TInputComment, TInputPost, TPost} from "../../types";
-import {TBlogDB, TCommentDB, TPostDB} from "../../db";
+import {TInputComment, TInputPost, TPost, TResultServiceObj} from "../../types";
+import {TCommentDB, TPostDB} from "../../db";
 import {postsRepository} from "./posts-repository";
-import {usersService} from "../users";
+import {usersRepository} from "../users";
 import {commentsRepository} from "../comments";
+import {blogsRepository} from "../blogs";
+import {createServiceResultObj} from "../../utils";
 
 export const postsService = {
-    async findPostById(id: string): Promise<TPostDB | null> {
-        return await postsRepository.findPostById(id);
+    async findPostById(id: string): Promise<TResultServiceObj<TPostDB>> {
+        const post = await postsRepository.findPostById(id);
+
+        if (post) {
+            return createServiceResultObj<TPostDB>("SUCCESS", "OK", post);
+        } else {
+            return createServiceResultObj("REJECT", "NOT_FOUND");
+        }
     },
-    async createPost(data: TInputPost, blog: TBlogDB): Promise<string> {
-        const newPost: Omit<TPost, 'id'> = {
-            blogName: blog.name,
-            createdAt: new Date().toISOString(),
-            ...data
+    async createPost(data: TInputPost): Promise<TResultServiceObj<string>> {
+        const blog = await blogsRepository.findBlogById(data.blogId);
+
+        if (blog) {
+            const newPost: Omit<TPost, 'id'> = {
+                blogName: blog.name,
+                createdAt: new Date().toISOString(),
+                ...data
+            }
+
+            const insertedId = await postsRepository.createPost(newPost);
+
+            return createServiceResultObj<string>("SUCCESS", "CREATED", insertedId);
         }
 
-        return await postsRepository.createPost(newPost);
+        return createServiceResultObj("REJECT", "NOT_FOUND");
     },
-    async createCommentForPost(id: string, data: TInputComment, userId: string): Promise<string> {
-        const personalData = await usersService.findUserById(userId);
-        const newComment: Omit<TCommentDB, '_id'> = {
-            commentatorInfo: {
-                userId: personalData!._id.toString(),
-                userLogin: personalData!.login,
-            },
-            createdAt: new Date().toISOString(),
-            postId: id,
-            ...data
-        }
+    async createCommentForPost(id: string, data: TInputComment, userId: string): Promise<TResultServiceObj<string>> {
+        const {result, status} = await this.findPostById(id);
 
-        return await commentsRepository.createComment(newComment);
+        if (result === "SUCCESS") {
+            const personalData = await usersRepository.findUserById(userId);
+            const newComment: Omit<TCommentDB, '_id'> = {
+                commentatorInfo: {
+                    userId: personalData!._id.toString(),
+                    userLogin: personalData!.login,
+                },
+                createdAt: new Date().toISOString(),
+                postId: id,
+                ...data
+            }
+
+            const insertedId = await commentsRepository.createComment(newComment);
+
+            return createServiceResultObj<string>("SUCCESS", "CREATED", insertedId);
+        }
+        return createServiceResultObj(result, status);
     },
-    async updatePostById(id: string, data: TInputPost): Promise<boolean> {
-        return await postsRepository.updatePostById(id, data)
+    async updatePostById(id: string, data: TInputPost): Promise<TResultServiceObj> {
+        const isUpdate = await postsRepository.updatePostById(id, data)
+
+        if (isUpdate) {
+            return createServiceResultObj("SUCCESS", "NO_CONTENT")
+        } else {
+            return createServiceResultObj("REJECT", "NOT_FOUND");
+        }
     },
-    async deletePost(id: string): Promise<boolean> {
-        return await postsRepository.deletePost(id)
+    async deletePost(id: string): Promise<TResultServiceObj> {
+        const isDelete = await postsRepository.deletePost(id)
+
+        if (isDelete) {
+            return createServiceResultObj("SUCCESS", "NO_CONTENT")
+        } else {
+            return createServiceResultObj("REJECT", "NOT_FOUND");
+        }
     }
 }

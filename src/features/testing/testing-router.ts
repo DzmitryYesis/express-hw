@@ -1,5 +1,5 @@
 import {Router, Request, Response} from 'express';
-import {StatusCodeEnum} from '../../constants';
+import {HttpStatusCodeEnum} from '../../constants';
 import {testingRepository} from "./testing-repository";
 
 export const testingRouter = Router();
@@ -9,7 +9,7 @@ const testingController = {
         await testingRepository.deleteAllData();
 
         res
-            .status(StatusCodeEnum.NO_CONTENT_204)
+            .status(HttpStatusCodeEnum.NO_CONTENT_204)
             .end()
     }
 }

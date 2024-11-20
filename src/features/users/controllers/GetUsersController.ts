@@ -1,4 +1,4 @@
-import {StatusCodeEnum} from "../../../constants";
+import {HttpStatusCodeEnum} from "../../../constants";
 import {formatQueryUsersData} from "../../../utils";
 import {Response} from 'express';
 import {
@@ -13,6 +13,6 @@ export const GetUsersController = async (req: RequestWithQuery<TUsersQuery>, res
     const users = await queryUsersRepository.getUsers(formatQueryUsersData(req.query) as TUsersQuery) as TResponseWithPagination<TUser[]>;
 
     res
-        .status(StatusCodeEnum.OK_200)
+        .status(HttpStatusCodeEnum.OK_200)
         .json(users);
 }

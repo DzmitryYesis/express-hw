@@ -1,22 +1,19 @@
 import {TInputComment, TOutPutErrorsType, RequestWithParamAndBody, TComment} from "../../../types";
 import {Response} from "express";
-import {StatusCodeEnum} from "../../../constants";
 import {postsService} from "../posts-service";
 import {queryCommentsRepository} from "../../comments";
+import {HttpStatusCodeEnum} from "../../../constants";
 
 export const CreateNewCommentForPostByIdController = async (req: RequestWithParamAndBody<{
     id: string
 }, TInputComment>, res: Response<TComment | TOutPutErrorsType>) => {
-    const post = await postsService.findPostById(req.params.id);
+    const {result, data} = await postsService.createCommentForPost(req.params.id, req.body, req.userId!)
 
-    if (post) {
-        const newCommentId = await postsService.createCommentForPost(req.params.id, req.body, req.userId!)
-        const newComment = await queryCommentsRepository.getCommentById(newCommentId);
+    if (result === "SUCCESS" && data) {
+        const newComment = await queryCommentsRepository.getCommentById(data);
 
-        res
-            .status(StatusCodeEnum.CREATED_201)
-            .json(newComment!);
+        res.status(HttpStatusCodeEnum.CREATED_201).json(newComment!);
     } else {
-        res.status(StatusCodeEnum.NOT_FOUND_404).end()
+        res.status(HttpStatusCodeEnum.NOT_FOUND_404).end()
     }
 }

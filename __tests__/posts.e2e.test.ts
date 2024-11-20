@@ -1,6 +1,6 @@
 import {SETTINGS} from '../src/settings';
 import {req} from './test-helper';
-import {StatusCodeEnum} from '../src/constants';
+import {HttpStatusCodeEnum} from '../src/constants';
 import {blogForTest, postForTest} from './dataset';
 import {TErrorMessage, TInputPost, TBlog, TPost} from '../src/types';
 import {MongoMemoryServer} from 'mongodb-memory-server';
@@ -19,7 +19,7 @@ describe('test CRUD flow for posts', () => {
             client = new MongoClient(uri);
             await client.connect();
 
-            await req.delete(SETTINGS.PATH.TESTING).expect(StatusCodeEnum.NO_CONTENT_204)
+            await req.delete(SETTINGS.PATH.TESTING).expect(HttpStatusCodeEnum.NO_CONTENT_204)
         })
 
     afterAll(async () => {
@@ -30,7 +30,7 @@ describe('test CRUD flow for posts', () => {
         it('should return empty array', async () => {
             const res = await req
                 .get(SETTINGS.PATH.POSTS)
-                .expect(StatusCodeEnum.OK_200)
+                .expect(HttpStatusCodeEnum.OK_200)
 
             console.log(res.body)
 
@@ -42,7 +42,7 @@ describe('test CRUD flow for posts', () => {
                 .post(SETTINGS.PATH.POSTS)
                 .set('authorization', `Basic bla-bla`)
                 .send({...postForTest})
-                .expect(StatusCodeEnum.NOT_AUTH_401)
+                .expect(HttpStatusCodeEnum.NOT_AUTH_401)
         })
 
     let blog1: TBlog;
@@ -51,7 +51,7 @@ describe('test CRUD flow for posts', () => {
                 .post(SETTINGS.PATH.BLOGS)
                 .set('authorization', `Basic ${authBasic}`)
                 .send({...blogForTest})
-                .expect(StatusCodeEnum.CREATED_201)
+                .expect(HttpStatusCodeEnum.CREATED_201)
 
             blog1 = resPostBlog.body;
 
@@ -59,7 +59,7 @@ describe('test CRUD flow for posts', () => {
                 .post(SETTINGS.PATH.POSTS)
                 .set('authorization', `Basic ${authBasic}`)
                 .send({...postForTest, title: '', blogId: blog1.id})
-                .expect(StatusCodeEnum.BAD_REQUEST_400)
+                .expect(HttpStatusCodeEnum.BAD_REQUEST_400)
 
             console.log(res.body)
             const errorTypeArray = res.body.errorsMessages.map((item: TErrorMessage) => item.field)
@@ -72,7 +72,7 @@ describe('test CRUD flow for posts', () => {
                 .post(SETTINGS.PATH.POSTS)
                 .set('authorization', `Basic ${authBasic}`)
                 .send({...postForTest, blogId: '671d29f1b13de9708bfe729b'})
-                .expect(StatusCodeEnum.BAD_REQUEST_400)
+                .expect(HttpStatusCodeEnum.BAD_REQUEST_400)
 
             console.log(res.body)
             const errorTypeArray = res.body.errorsMessages.map((item: TErrorMessage) => item.field)
@@ -86,14 +86,14 @@ describe('test CRUD flow for posts', () => {
                 .post(SETTINGS.PATH.POSTS)
                 .set('authorization', `Basic ${authBasic}`)
                 .send({...postForTest, blogId: blog1.id})
-                .expect(StatusCodeEnum.CREATED_201)
+                .expect(HttpStatusCodeEnum.CREATED_201)
 
             post1 = res.body;
             console.log(res.body)
 
             const resGet = await req
                 .get(SETTINGS.PATH.POSTS)
-                .expect(StatusCodeEnum.OK_200)
+                .expect(HttpStatusCodeEnum.OK_200)
 
             expect(post1).toEqual({
                 id: expect.any(String),
@@ -112,13 +112,13 @@ describe('test CRUD flow for posts', () => {
                 .post(SETTINGS.PATH.POSTS)
                 .set('authorization', `Basic ${authBasic}`)
                 .send({...postForTest, blogId: blog1.id})
-                .expect(StatusCodeEnum.CREATED_201)
+                .expect(HttpStatusCodeEnum.CREATED_201)
 
             post2 = resPost.body;
 
             const res = await req
                 .get(SETTINGS.PATH.POSTS)
-                .expect(StatusCodeEnum.OK_200)
+                .expect(HttpStatusCodeEnum.OK_200)
 
             console.log(res.body)
 
@@ -144,7 +144,7 @@ describe('test CRUD flow for posts', () => {
                 .put(`${SETTINGS.PATH.POSTS}/671d29f1b13de9708bfe729b`)
                 .set('authorization', `Basic ${authBasic}`)
                 .send(data)
-                .expect(StatusCodeEnum.NOT_FOUND_404)
+                .expect(HttpStatusCodeEnum.NOT_FOUND_404)
         })
 
         it('should update post with id = post1.id', async () => {
@@ -159,11 +159,11 @@ describe('test CRUD flow for posts', () => {
                 .put(`${SETTINGS.PATH.POSTS}/${post1.id}`)
                 .set('authorization', `Basic ${authBasic}`)
                 .send(data)
-                .expect(StatusCodeEnum.NO_CONTENT_204)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
 
             const res = await req
                 .get(SETTINGS.PATH.POSTS)
-                .expect(StatusCodeEnum.OK_200)
+                .expect(HttpStatusCodeEnum.OK_200)
 
             const updatePost = res.body.items.find((p: TPost) => p.id === post1.id);
             const notUpdatePost = res.body.items.find((p: TPost) => p.id === post2.id);
@@ -182,18 +182,18 @@ describe('test CRUD flow for posts', () => {
             await req
                 .delete(`${SETTINGS.PATH.POSTS}/671d29f1b13de9708bfe729b`)
                 .set('authorization', `Basic ${authBasic}`)
-                .expect(StatusCodeEnum.NOT_FOUND_404)
+                .expect(HttpStatusCodeEnum.NOT_FOUND_404)
         })
 
         it('should delete post with id = post1.id', async () => {
             await req
                 .delete(`${SETTINGS.PATH.POSTS}/${post1.id}`)
                 .set('authorization', `Basic ${authBasic}`)
-                .expect(StatusCodeEnum.NO_CONTENT_204)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
 
             const res = await req
                 .get(SETTINGS.PATH.POSTS)
-                .expect(StatusCodeEnum.OK_200)
+                .expect(HttpStatusCodeEnum.OK_200)
 
             const deletedPost = res.body.items.find((p: TPost) => p.id === post1.id);
             const notDeletedPost = res.body.items.find((p: TPost) => p.id === post2.id);

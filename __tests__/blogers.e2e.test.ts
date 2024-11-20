@@ -1,6 +1,6 @@
 import {req} from './test-helper';
 import {SETTINGS} from '../src/settings';
-import {StatusCodeEnum} from '../src/constants';
+import {HttpStatusCodeEnum} from '../src/constants';
 import {blogForTest} from './dataset';
 import {TErrorMessage, TInputBlog, TBlog} from '../src/types';
 import {MongoMemoryServer} from 'mongodb-memory-server';
@@ -19,7 +19,7 @@ describe('test CRUD flow for blogs', () => {
             client = new MongoClient(uri);
             await client.connect();
 
-            await req.delete(SETTINGS.PATH.TESTING).expect(StatusCodeEnum.NO_CONTENT_204)
+            await req.delete(SETTINGS.PATH.TESTING).expect(HttpStatusCodeEnum.NO_CONTENT_204)
         })
 
     afterAll(async () => {
@@ -30,7 +30,7 @@ describe('test CRUD flow for blogs', () => {
         it('should return empty array', async () => {
             const res = await req
                 .get(SETTINGS.PATH.BLOGS)
-                .expect(StatusCodeEnum.OK_200)
+                .expect(HttpStatusCodeEnum.OK_200)
 
             console.log(res.body)
 
@@ -42,7 +42,7 @@ describe('test CRUD flow for blogs', () => {
                 .post(SETTINGS.PATH.BLOGS)
                 .set('authorization', `Basic bla-bla`)
                 .send({...blogForTest})
-                .expect(StatusCodeEnum.NOT_AUTH_401)
+                .expect(HttpStatusCodeEnum.NOT_AUTH_401)
         })
 
         it('should return error for field name', async () => {
@@ -50,7 +50,7 @@ describe('test CRUD flow for blogs', () => {
                 .post(SETTINGS.PATH.BLOGS)
                 .set('authorization', `Basic ${authBasic}`)
                 .send({...blogForTest, name: ''})
-                .expect(StatusCodeEnum.BAD_REQUEST_400)
+                .expect(HttpStatusCodeEnum.BAD_REQUEST_400)
 
             console.log(res.body)
             const errorTypeArray = res.body.errorsMessages.map((item: TErrorMessage) => item.field)
@@ -63,7 +63,7 @@ describe('test CRUD flow for blogs', () => {
                 .post(SETTINGS.PATH.BLOGS)
                 .set('authorization', `Basic ${authBasic}`)
                 .send({...blogForTest, websiteUrl: 'blabla.com1'})
-                .expect(StatusCodeEnum.BAD_REQUEST_400)
+                .expect(HttpStatusCodeEnum.BAD_REQUEST_400)
 
             console.log(res.body)
             const errorTypeArray = res.body.errorsMessages.map((item: TErrorMessage) => item.field)
@@ -77,14 +77,14 @@ describe('test CRUD flow for blogs', () => {
                 .post(SETTINGS.PATH.BLOGS)
                 .set('authorization', `Basic ${authBasic}`)
                 .send({...blogForTest})
-                .expect(StatusCodeEnum.CREATED_201)
+                .expect(HttpStatusCodeEnum.CREATED_201)
 
             blog1 = res.body;
             console.log(res.body)
 
             const resGet = await req
                 .get(SETTINGS.PATH.BLOGS)
-                .expect(StatusCodeEnum.OK_200)
+                .expect(HttpStatusCodeEnum.OK_200)
 
             expect(blog1).toEqual({
                 id: expect.any(String),
@@ -101,13 +101,13 @@ describe('test CRUD flow for blogs', () => {
                 .post(SETTINGS.PATH.BLOGS)
                 .set('authorization', `Basic ${authBasic}`)
                 .send({...blogForTest})
-                .expect(StatusCodeEnum.CREATED_201)
+                .expect(HttpStatusCodeEnum.CREATED_201)
 
             blog2 = resPost.body;
 
             const res = await req
                 .get(SETTINGS.PATH.BLOGS)
-                .expect(StatusCodeEnum.OK_200)
+                .expect(HttpStatusCodeEnum.OK_200)
 
             console.log(res.body)
 
@@ -126,7 +126,7 @@ describe('test CRUD flow for blogs', () => {
                 .put(`${SETTINGS.PATH.BLOGS}/671d29f1b13de9708bfe729b`)
                 .set('authorization', `Basic ${authBasic}`)
                 .send(data)
-                .expect(StatusCodeEnum.NOT_FOUND_404)
+                .expect(HttpStatusCodeEnum.NOT_FOUND_404)
         })
 
         it('should update blog with id = blog1.id', async () => {
@@ -140,11 +140,11 @@ describe('test CRUD flow for blogs', () => {
                 .put(`${SETTINGS.PATH.BLOGS}/${blog1.id}`)
                 .set('authorization', `Basic ${authBasic}`)
                 .send(data)
-                .expect(StatusCodeEnum.NO_CONTENT_204)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
 
             const res = await req
                 .get(SETTINGS.PATH.BLOGS)
-                .expect(StatusCodeEnum.OK_200)
+                .expect(HttpStatusCodeEnum.OK_200)
 
             const updateBlog = res.body.items.find((b: TBlog) => b.id === blog1.id);
             const notUpdateBlog = res.body.items.find((b: TBlog) => b.id === blog2.id);
@@ -163,18 +163,18 @@ describe('test CRUD flow for blogs', () => {
             await req
                 .delete(`${SETTINGS.PATH.BLOGS}/671d29f1b13de9708bfe729b`)
                 .set('authorization', `Basic ${authBasic}`)
-                .expect(StatusCodeEnum.NOT_FOUND_404)
+                .expect(HttpStatusCodeEnum.NOT_FOUND_404)
         })
 
         it('should delete blog with id = blog1.id', async () => {
             await req
                 .delete(`${SETTINGS.PATH.BLOGS}/${blog1.id}`)
                 .set('authorization', `Basic ${authBasic}`)
-                .expect(StatusCodeEnum.NO_CONTENT_204)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
 
             const res = await req
                 .get(SETTINGS.PATH.BLOGS)
-                .expect(StatusCodeEnum.OK_200)
+                .expect(HttpStatusCodeEnum.OK_200)
 
             const deletedBlog = res.body.items.find((b: TBlog) => b.id === blog1.id);
             const notDeletedBlog = res.body.items.find((b: TBlog) => b.id === blog2.id);

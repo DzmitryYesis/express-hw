@@ -1,7 +1,7 @@
 import {NextFunction, Response, Request} from 'express';
 import {validationResult} from 'express-validator';
 import {TOutPutErrorsType} from '../types';
-import {StatusCodeEnum} from '../constants';
+import {HttpStatusCodeEnum} from '../constants';
 
 export const inputCheckErrorsMiddleware = (req: Request, res: Response<TOutPutErrorsType>, next: NextFunction) => {
     const e = validationResult(req)
@@ -9,7 +9,7 @@ export const inputCheckErrorsMiddleware = (req: Request, res: Response<TOutPutEr
         const eArray = e.array({onlyFirstError: true}) as { path: string, msg: string }[]
 
         res
-            .status(StatusCodeEnum.BAD_REQUEST_400)
+            .status(HttpStatusCodeEnum.BAD_REQUEST_400)
             .json({
                 errorsMessages: eArray.map(x => ({field: x.path, message: x.msg}))
             })

@@ -8,7 +8,7 @@ export type TInputPost = {
     title: string,
     shortDescription: string,
     content: string,
-    blogId: string
+    blogId: string,
 }
 
 export type TInputUser = {
@@ -17,7 +17,7 @@ export type TInputUser = {
     email: string,
 }
 
-export type TInputAuth = {
+export type TInputLogin = {
     loginOrEmail: string,
     password: string,
 }

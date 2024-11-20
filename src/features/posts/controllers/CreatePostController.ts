@@ -1,21 +1,18 @@
 import {TInputPost, TOutPutErrorsType, TPost, RequestWithBody} from '../../../types';
 import {Response} from 'express';
-import {StatusCodeEnum} from '../../../constants';
-import {blogsService} from "../../blogs";
 import {postsService} from "../posts-service";
 import {queryPostsRepository} from "../query-posts-repository";
+import {HttpStatusCodeEnum} from "../../../constants";
 
 export const CreatePostController = async (req: RequestWithBody<TInputPost>, res: Response<TPost | TOutPutErrorsType>) => {
-    const blog = await blogsService.findBlogById(req.body.blogId);
+    const {result, data} = await postsService.createPost(req.body);
 
-    if (blog) {
-        const newPostId = await postsService.createPost(req.body, blog);
-        const newPost = await queryPostsRepository.getPostById(newPostId);
+    if (result === "SUCCESS" && data) {
+        const newPost = await queryPostsRepository.getPostById(data);
 
-        res
-            .status(StatusCodeEnum.CREATED_201)
-            .json(newPost!)
+        res.status(HttpStatusCodeEnum.CREATED_201).json(newPost!)
     } else {
-        throw new Error('Oops!')
+        //optional
+        res.status(HttpStatusCodeEnum.NOT_FOUND_404).end()
     }
 }

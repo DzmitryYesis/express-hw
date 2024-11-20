@@ -1,22 +1,20 @@
 import {TCommentsQuery, RequestWithParamAndQuery, TResponseWithPagination, TComment} from "../../../types";
 import {Response} from "express";
 import {formatQueryCommentsData} from "../../../utils";
-import {StatusCodeEnum} from "../../../constants";
 import {queryPostsRepository} from "../query-posts-repository";
 import {postsService} from "../posts-service";
+import {HttpStatusCodeEnum} from "../../../constants";
 
 export const GetCommentsForPostByIdController = async (req: RequestWithParamAndQuery<{
     id: string
 }, TCommentsQuery>, res: Response<TResponseWithPagination<TComment[]>>) => {
-    const post = await postsService.findPostById(req.params.id);
+    const {result} = await postsService.findPostById(req.params.id);
 
-    if (post) {
+    if (result === "SUCCESS") {
         const comments = await queryPostsRepository.getCommentsForPostById(req.params.id, formatQueryCommentsData(req.query) as TCommentsQuery);
 
-        res
-            .status(StatusCodeEnum.OK_200)
-            .json(comments)
+        res.status(HttpStatusCodeEnum.OK_200).json(comments)
     } else {
-        res.status(StatusCodeEnum.NOT_FOUND_404).end()
+        res.status(HttpStatusCodeEnum.NOT_FOUND_404).end()
     }
 }

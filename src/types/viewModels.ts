@@ -24,6 +24,10 @@ export type TUser = {
     createdAt: string
 }
 
+export type TLoginUser = {
+    accessToken: string
+};
+
 export type TPersonalData = {
     email: string,
     login: string,

@@ -4,3 +4,4 @@ export * from './responseTypes';
 export * from './queryTypes';
 export * from './inputModels';
 export * from './errors';
+export * from './resultObj';
