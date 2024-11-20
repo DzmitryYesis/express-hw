@@ -10,7 +10,7 @@ export const commentsService = {
             return createServiceResultObj<TCommentDB>("SUCCESS", "OK", comment);
         }
 
-        return createServiceResultObj("SUCCESS", "NOT_FOUND");
+        return createServiceResultObj("REJECT", "NOT_FOUND");
     },
     async updateCommentById(userId: string, id: string, data: TInputComment): Promise<TResultServiceObj> {
         const {result, status, data: findCommentByIdData} = await this.findCommentById(id);
