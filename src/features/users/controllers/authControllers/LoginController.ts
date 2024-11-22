@@ -1,7 +1,7 @@
 import {Response} from 'express';
-import {RequestWithBody, TLoginUser, TInputLogin} from "../../../types";
-import {usersService} from "../../users";
-import {HttpStatusCodeEnum} from "../../../constants";
+import {RequestWithBody, TLoginUser, TInputLogin} from "../../../../types";
+import {usersService} from "../../users-service";
+import {HttpStatusCodeEnum} from "../../../../constants";
 
 export const LoginController = async (req: RequestWithBody<TInputLogin>, res: Response<TLoginUser>) => {
     const {result, data} = await usersService.loginUser(req.body.loginOrEmail, req.body.password);

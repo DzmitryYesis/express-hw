@@ -6,26 +6,11 @@ import {createServiceResultObj, jwtService} from "../../utils";
 
 export const usersService = {
     async createUser(data: TInputUser): Promise<TResultServiceObj<TOutPutErrorsType | string>> {
-        const {result: findUserByLoginResult} = await this.findUserByLogin(data.login);
-        const {result: findUserByEmailResult} = await this.findUserByEmail(data.email);
+        const {result, status, data: checkCredentialData} = await this.checkLoginAndEmailCredential(data.login, data.email);
 
-        const errors: TErrorMessage[] = [];
-
-        if (findUserByLoginResult === "SUCCESS") {
-            errors.push({field: 'login', message: 'login not unique error message'})
+        if (result === "REJECT") {
+            return createServiceResultObj<TOutPutErrorsType>(result, status, checkCredentialData);
         }
-        if (findUserByEmailResult === "SUCCESS") {
-            errors.push({field: 'email', message: 'email not unique error message'})
-        }
-
-        if (errors.length > 0) {
-            const badRequestResponse: TOutPutErrorsType = {
-                errorsMessages: [errors[0]]
-            }
-
-            return createServiceResultObj<TOutPutErrorsType>("REJECT", "BAD_REQUEST", badRequestResponse)
-        }
-
 
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await this.createPasswordHash(data.password, salt)
@@ -41,6 +26,29 @@ export const usersService = {
         const insertedId = await usersRepository.createUser(newUser);
 
         return createServiceResultObj<string>("SUCCESS", "CREATED", insertedId);
+    },
+    async checkLoginAndEmailCredential(login: string, email: string): Promise<TResultServiceObj<TOutPutErrorsType>> {
+        const {result: findUserByLoginResult} = await this.findUserByLogin(login);
+        const {result: findUserByEmailResult} = await this.findUserByEmail(email);
+
+        const errors: TErrorMessage[] = [];
+
+        if (findUserByLoginResult === "SUCCESS") {
+            errors.push({field: 'login', message: 'login not unique error message'})
+        }
+        if (findUserByEmailResult === "SUCCESS") {
+            errors.push({field: 'email', message: 'email not unique error message'})
+        }
+
+        if (errors.length > 0) {
+            const badRequestResponse: TOutPutErrorsType = {
+                errorsMessages: [errors[0]]
+            }
+
+            return createServiceResultObj<TOutPutErrorsType>("REJECT", "BAD_REQUEST", badRequestResponse);
+        }
+
+        return createServiceResultObj("SUCCESS", "NOT_FOUND");
     },
     async deleteUser(id: string): Promise<TResultServiceObj> {
         const isDelete = await usersRepository.deleteUser(id);

@@ -1,7 +1,7 @@
-import {RequestWithParam} from "../../../types";
+import {RequestWithParam} from "../../../../types";
 import {Response} from "express";
-import {HttpStatusCodeEnum} from "../../../constants";
-import {usersService} from "../users-service";
+import {HttpStatusCodeEnum} from "../../../../constants";
+import {usersService} from "../../users-service";
 
 export const DeleteUserController = async (req: RequestWithParam<{
     id: string
