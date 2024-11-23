@@ -21,11 +21,19 @@ export type TPostDB = {
 
 export type TUserDB = {
     _id: ObjectId,
-    login: string,
-    email: string,
-    createdAt: string
-    passwordHash: string,
-    salt: string,
+    accountData: {
+        login: string,
+        email: string,
+        createdAt: string
+        passwordHash: string,
+        salt: string,
+    },
+    emailConfirmation: {
+        confirmationCode: string,
+        expirationDate: Date,
+        isConfirmed: boolean,
+    }
+
 }
 
 export type TCommentDB = {

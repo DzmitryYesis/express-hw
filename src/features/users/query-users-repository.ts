@@ -12,8 +12,8 @@ export const queryUsersRepository = {
         const users = await usersCollection
             .find({
                 $or: [
-                    queryData.searchLoginTerm ? {login: {$regex: queryData.searchLoginTerm, $options: 'i'}} : {},
-                    queryData.searchEmailTerm ? {email: {$regex: queryData.searchEmailTerm, $options: 'i'}} : {}
+                    queryData.searchLoginTerm ? {'accountData.login': {$regex: queryData.searchLoginTerm, $options: 'i'}} : {},
+                    queryData.searchEmailTerm ? {'accountData.email': {$regex: queryData.searchEmailTerm, $options: 'i'}} : {}
                 ]
             })
             .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? 1 : -1})
@@ -23,8 +23,8 @@ export const queryUsersRepository = {
 
         const totalCount = await usersCollection.countDocuments({
             $or: [
-                queryData.searchLoginTerm ? {login: {$regex: queryData.searchLoginTerm, $options: 'i'}} : {},
-                queryData.searchEmailTerm ? {email: {$regex: queryData.searchEmailTerm, $options: 'i'}} : {}
+                queryData.searchLoginTerm ? {'accountData.login': {$regex: queryData.searchLoginTerm, $options: 'i'}} : {},
+                queryData.searchEmailTerm ? {'accountData.email': {$regex: queryData.searchEmailTerm, $options: 'i'}} : {}
             ]
         });
 
@@ -35,9 +35,9 @@ export const queryUsersRepository = {
             totalCount,
             items: users.map(u => ({
                 id: u._id.toString(),
-                login: u.login,
-                email: u.email,
-                createdAt: u.createdAt
+                login: u.accountData.login,
+                email: u.accountData.email,
+                createdAt: u.accountData.createdAt
             })),
         }
     },
@@ -47,9 +47,9 @@ export const queryUsersRepository = {
         if (user) {
             return {
                 id: user._id.toString(),
-                login: user.login,
-                email: user.email,
-                createdAt: user.createdAt
+                login: user.accountData.login,
+                email: user.accountData.email,
+                createdAt: user.accountData.createdAt
             }
         }
 
@@ -60,8 +60,8 @@ export const queryUsersRepository = {
 
         if (user) {
             return {
-                login: user.login,
-                email: user.email,
+                login: user.accountData.login,
+                email: user.accountData.email,
                 userId: user._id.toString(),
             }
         }

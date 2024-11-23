@@ -1,7 +1,18 @@
 import {Router} from "express";
-import {authLoginOrEmailValidator, authPasswordValidator} from "../../middlewares";
+import {
+    authConfirmationCodeValidator,
+    authEmailValidator,
+    authLoginOrEmailValidator,
+    authLoginValidator,
+    authPasswordValidator
+} from "../../middlewares";
 import {authBearerMiddleware, inputCheckErrorsMiddleware} from "../../../../global-middlewares";
-import {LoginController, GetPersonalDataController} from "../../controllers";
+import {
+    LoginController,
+    GetPersonalDataController,
+    RegistrationUserController,
+    RegistrationConfirmationCodeController, RegistrationEmailResendingController
+} from "../../controllers";
 
 export const authRouter = Router();
 
@@ -17,7 +28,22 @@ authRouter.post('/login',
     LoginController
 );
 
-/*
 authRouter.post('/registration',
+    authLoginValidator,
+    authPasswordValidator,
+    authEmailValidator,
+    inputCheckErrorsMiddleware,
+    RegistrationUserController
+);
 
-    );*/
+authRouter.post('/registration-confirmation',
+    authConfirmationCodeValidator,
+    inputCheckErrorsMiddleware,
+    RegistrationConfirmationCodeController
+);
+
+authRouter.post('/registration-email-resending',
+    authEmailValidator,
+    inputCheckErrorsMiddleware,
+    RegistrationEmailResendingController
+)
