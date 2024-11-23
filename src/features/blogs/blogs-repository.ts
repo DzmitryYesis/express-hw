@@ -1,12 +1,10 @@
 import {blogsCollection, TBlogDB} from '../../db';
 import {TBlog, TInputBlog} from '../../types';
-import {ObjectId, OptionalId} from 'mongodb';
+import {ObjectId} from 'mongodb';
 
 export const blogsRepository = {
     async createBlog(data: Omit<TBlog, 'id'>): Promise<string> {
-        //TODO fix problem with type
-        // @ts-ignore
-        const result = await blogsCollection.insertOne(data as OptionalId<TBlog>);
+        const result = await blogsCollection.insertOne({...data} as TBlogDB);
 
         return result.insertedId.toString();
     },

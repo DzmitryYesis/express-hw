@@ -1,4 +1,4 @@
-import {TInputComment, TInputPost, TPost, TResultServiceObj} from "../../types";
+import {TInputComment, TInputPost, TResultServiceObj} from "../../types";
 import {TCommentDB, TPostDB} from "../../db";
 import {postsRepository} from "./posts-repository";
 import {usersRepository} from "../users";
@@ -20,7 +20,7 @@ export const postsService = {
         const blog = await blogsRepository.findBlogById(data.blogId);
 
         if (blog) {
-            const newPost: Omit<TPost, 'id'> = {
+            const newPost: Omit<TPostDB, '_id'> = {
                 blogName: blog.name,
                 createdAt: new Date().toISOString(),
                 ...data

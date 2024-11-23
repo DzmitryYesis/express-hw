@@ -1,12 +1,10 @@
 import {commentsCollection, TCommentDB} from "../../db";
-import {ObjectId, OptionalId} from "mongodb";
+import {ObjectId} from "mongodb";
 import {TInputComment} from "../../types";
 
 export const commentsRepository = {
     async createComment(data: Omit<TCommentDB, '_id'>): Promise<string> {
-        //TODO fix type problem
-        // @ts-ignore
-        const result = await commentsCollection.insertOne(data as OptionalId<TCommentDB>);
+        const result = await commentsCollection.insertOne({...data} as TCommentDB);
 
         return result.insertedId.toString();
     },

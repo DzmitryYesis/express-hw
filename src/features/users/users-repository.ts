@@ -1,11 +1,9 @@
 import {TUserDB, usersCollection} from "../../db";
-import {ObjectId, OptionalId} from "mongodb";
+import {ObjectId} from "mongodb";
 
 export const usersRepository = {
     async createUser(data: Omit<TUserDB, '_id'>): Promise<string> {
-        //TODO fix type problem
-        // @ts-ignore
-        const result = await usersCollection.insertOne(data as OptionalId<TUserDB>);
+        const result = await usersCollection.insertOne({...data} as TUserDB);
 
         return result.insertedId.toString()
     },

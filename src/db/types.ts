@@ -33,7 +33,6 @@ export type TUserDB = {
         expirationDate: Date,
         isConfirmed: boolean,
     }
-
 }
 
 export type TCommentDB = {

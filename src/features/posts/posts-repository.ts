@@ -1,12 +1,10 @@
 import {postsCollection, TPostDB} from '../../db';
-import {TInputPost, TPost} from '../../types';
-import {ObjectId, OptionalId} from 'mongodb';
+import {TInputPost} from '../../types';
+import {ObjectId} from 'mongodb';
 
 export const postsRepository = {
-    async createPost(data: Omit<TPost, 'id'>): Promise<string> {
-        //TODO fix problem with type
-        // @ts-ignore
-        const result = await postsCollection.insertOne(data as OptionalId<TPost>);
+    async createPost(data: Omit<TPostDB, '_id'>): Promise<string> {
+        const result = await postsCollection.insertOne({...data} as TPostDB);
 
         return result.insertedId.toString();
     },

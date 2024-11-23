@@ -1,7 +1,7 @@
 import {blogsRepository} from "../blogs";
 import {postsRepository} from '../posts'
-import {TBlog, TInputBlog, TInputPost, TPost, TResultServiceObj} from "../../types";
-import {TBlogDB} from "../../db";
+import {TInputBlog, TInputPost, TResultServiceObj} from "../../types";
+import {TBlogDB, TPostDB} from "../../db";
 import {createServiceResultObj} from "../../utils";
 
 export const blogsService = {
@@ -13,7 +13,7 @@ export const blogsService = {
         return createServiceResultObj("REJECT", "NOT_FOUND");
     },
     async createBlog(data: TInputBlog): Promise<TResultServiceObj<string>> {
-        const newBlog: Omit<TBlog, 'id'> = {
+        const newBlog: Omit<TBlogDB, '_id'> = {
             createdAt: new Date().toISOString(),
             isMembership: false,
             ...data
@@ -27,7 +27,7 @@ export const blogsService = {
         const {result, status, data: findBlogByIdData} = await this.findBlogById(blogId);
 
         if (result === "SUCCESS" ) {
-            const newPost: Omit<TPost, 'id'> = {
+            const newPost: Omit<TPostDB, '_id'> = {
                 blogName: findBlogByIdData!.name,
                 blogId: blogId,
                 createdAt: new Date().toISOString(),
