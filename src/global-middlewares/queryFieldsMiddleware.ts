@@ -8,7 +8,7 @@ import {
     TUsersQuery
 } from "../types";
 
-export const queryFieldsMiddleware = (req: RequestWithQuery<TBlogsQuery | TPostsQuery | TUsersQuery | TCommentsQuery>, res: Response, next: NextFunction) => {
+export const queryFieldsMiddleware = (req: RequestWithQuery<TBlogsQuery | TPostsQuery | TUsersQuery | TCommentsQuery | {}>, res: Response, next: NextFunction) => {
     req.query = matchedData(req);
     next()
 }

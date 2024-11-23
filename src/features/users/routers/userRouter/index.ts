@@ -19,6 +19,7 @@ import {
 export const userRouter = Router();
 
 userRouter.get('/',
+    authBasicMiddleware,
     ...usersQueriesValidator,
     queryFieldsMiddleware,
     GetUsersController

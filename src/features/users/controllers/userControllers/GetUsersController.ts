@@ -10,7 +10,7 @@ import {
 import {queryUsersRepository} from "../../query-users-repository";
 
 export const GetUsersController = async (req: RequestWithQuery<TUsersQuery>, res: Response<TResponseWithPagination<TUser[]>>) => {
-    const users = await queryUsersRepository.getUsers(formatQueryUsersData(req.query) as TUsersQuery) as TResponseWithPagination<TUser[]>;
+    const users = await queryUsersRepository.getUsers(formatQueryUsersData(req.query));
 
     res
         .status(HttpStatusCodeEnum.OK_200)

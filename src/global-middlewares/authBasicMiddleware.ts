@@ -1,8 +1,9 @@
-import {NextFunction, Request, Response} from 'express';
+import {NextFunction, Response} from 'express';
 import {HttpStatusCodeEnum} from '../constants';
 import {SETTINGS} from '../settings';
+import {CustomRequest} from "../types";
 
-export const authBasicMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const authBasicMiddleware = (req: CustomRequest, res: Response, next: NextFunction) => {
     const auth = req.headers['authorization'] as string;
 
     if (!auth || !auth.startsWith('Basic ')) {

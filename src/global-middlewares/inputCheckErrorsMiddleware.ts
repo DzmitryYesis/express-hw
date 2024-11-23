@@ -1,9 +1,9 @@
-import {NextFunction, Response, Request} from 'express';
+import {NextFunction, Response} from 'express';
 import {validationResult} from 'express-validator';
-import {TOutPutErrorsType} from '../types';
+import {CustomRequest, TOutPutErrorsType} from '../types';
 import {HttpStatusCodeEnum} from '../constants';
 
-export const inputCheckErrorsMiddleware = (req: Request, res: Response<TOutPutErrorsType>, next: NextFunction) => {
+export const inputCheckErrorsMiddleware = (req: CustomRequest, res: Response<TOutPutErrorsType>, next: NextFunction) => {
     const e = validationResult(req)
     if (!e.isEmpty()) {
         const eArray = e.array({onlyFirstError: true}) as { path: string, msg: string }[]
