@@ -16,7 +16,7 @@ export const queryUsersRepository = {
                     queryData.searchEmailTerm ? {'accountData.email': {$regex: queryData.searchEmailTerm, $options: 'i'}} : {}
                 ]
             })
-            .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? 1 : -1})
+            .sort({[`accountData.${queryData.sortBy}`]: queryData.sortDirection === 'asc' ? 1 : -1})
             .skip((+queryData.pageNumber - 1) * +queryData.pageSize)
             .limit(+queryData.pageSize)
             .toArray();
