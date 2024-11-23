@@ -3,28 +3,28 @@ import {
     authBasicMiddleware,
     inputCheckErrorsMiddleware,
     queryFieldsMiddleware
-} from "../../global-middlewares";
+} from "../../../../global-middlewares";
 import {
     userEmailValidator,
     userLoginValidator,
     userPasswordValidator,
-    users
-} from "./middlewares";
+    usersQueriesValidator
+} from "../../middlewares";
 import {
     DeleteUserController,
     GetUsersController,
     CreateUserController
-} from "./controllers";
+} from "../../controllers";
 
-export const usersRouter = Router();
+export const userRouter = Router();
 
-usersRouter.get('/',
-    ...users,
+userRouter.get('/',
+    ...usersQueriesValidator,
     queryFieldsMiddleware,
     GetUsersController
 );
 
-usersRouter.post('/',
+userRouter.post('/',
     authBasicMiddleware,
     userLoginValidator,
     userPasswordValidator,
@@ -33,4 +33,4 @@ usersRouter.post('/',
     CreateUserController
 );
 
-usersRouter.delete('/:id', authBasicMiddleware, DeleteUserController)
+userRouter.delete('/:id', authBasicMiddleware, DeleteUserController)

@@ -22,6 +22,14 @@ export type TInputLogin = {
     password: string,
 }
 
+export type TInputCode = {
+    code: string,
+}
+
+export type TInputResendEmail = {
+    email: string,
+}
+
 export type TInputComment = {
     content: string,
 }

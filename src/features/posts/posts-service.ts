@@ -41,7 +41,7 @@ export const postsService = {
             const newComment: Omit<TCommentDB, '_id'> = {
                 commentatorInfo: {
                     userId: personalData!._id.toString(),
-                    userLogin: personalData!.login,
+                    userLogin: personalData!.accountData.login,
                 },
                 createdAt: new Date().toISOString(),
                 postId: id,

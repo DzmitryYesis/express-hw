@@ -2,12 +2,57 @@ import {TErrorMessage, TInputUser, TLoginUser, TOutPutErrorsType, TResultService
 import bcrypt from "bcrypt";
 import {TUserDB} from "../../db";
 import {usersRepository} from "./users-repository";
-import {createServiceResultObj, jwtService} from "../../utils";
+import {createServiceResultObj, jwtService, sendEmailService} from "../../utils";
+import {v4 as uuidV4} from "uuid";
+import {add} from "date-fns";
 
 export const usersService = {
-    async createUser(data: TInputUser): Promise<TResultServiceObj<TOutPutErrorsType | string>> {
-        const {result: findUserByLoginResult} = await this.findUserByLogin(data.login);
-        const {result: findUserByEmailResult} = await this.findUserByEmail(data.email);
+    async createUser(data: TInputUser, isAdmin = false): Promise<TResultServiceObj<TOutPutErrorsType | string>> {
+        const {
+            result,
+            status,
+            data: checkCredentialData
+        } = await this.checkLoginAndEmailCredential(data.login, data.email);
+
+        if (result === "REJECT") {
+            return createServiceResultObj<TOutPutErrorsType>(result, status, checkCredentialData);
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const passwordHash = await this.createPasswordHash(data.password, salt)
+
+        const newUser: Omit<TUserDB, '_id'> = {
+            accountData: {
+                email: data.email,
+                login: data.login,
+                salt: salt,
+                passwordHash: passwordHash,
+                createdAt: new Date().toISOString()
+            },
+            emailConfirmation: {
+                confirmationCode: uuidV4(),
+                expirationDate: add(new Date(), {
+                    hours: 1,
+                    minutes: 3,
+                }),
+                isConfirmed: false,
+            }
+        }
+
+        const insertedId = await usersRepository.createUser(newUser);
+
+        if (!isAdmin) {
+            const emailHtml = `<h1>Hello ${newUser.accountData.login}</h1> <p><a href="https://some-url.com/confirm-registration?code=${newUser.emailConfirmation.confirmationCode}"></a>Click to confirm your email</p>`
+
+            sendEmailService.sendEmail(data.email, 'Confirm your Email', emailHtml)
+                .catch(e => console.log('СARAMBA!!!: ', e));
+        }
+
+        return createServiceResultObj<string>("SUCCESS", "CREATED", insertedId);
+    },
+    async checkLoginAndEmailCredential(login: string, email: string): Promise<TResultServiceObj<TOutPutErrorsType>> {
+        const {result: findUserByLoginResult} = await this.findUserByLogin(login);
+        const {result: findUserByEmailResult} = await this.findUserByEmail(email);
 
         const errors: TErrorMessage[] = [];
 
@@ -23,24 +68,52 @@ export const usersService = {
                 errorsMessages: [errors[0]]
             }
 
-            return createServiceResultObj<TOutPutErrorsType>("REJECT", "BAD_REQUEST", badRequestResponse)
+            return createServiceResultObj<TOutPutErrorsType>("REJECT", "BAD_REQUEST", badRequestResponse);
         }
 
+        return createServiceResultObj("SUCCESS", "NOT_FOUND");
+    },
+    async confirmUserAccount(code: string): Promise<TResultServiceObj<TOutPutErrorsType>> {
+        const {result, data} = await this.findUserByConfirmationCode(code);
 
-        const salt = await bcrypt.genSalt(10);
-        const passwordHash = await this.createPasswordHash(data.password, salt)
+        if (result === "REJECT" ||
+            data!.emailConfirmation.confirmationCode !== code ||
+            data!.emailConfirmation.expirationDate < new Date() ||
+            data!.emailConfirmation.isConfirmed) {
+            const badRequestResponse: TOutPutErrorsType = {
+                errorsMessages: [{field: 'code', message: 'some problem'}],
+            }
 
-        const newUser: Omit<TUserDB, '_id'> = {
-            email: data.email,
-            login: data.login,
-            salt: salt,
-            passwordHash: passwordHash,
-            createdAt: new Date().toISOString()
+            return createServiceResultObj<TOutPutErrorsType>("REJECT", "BAD_REQUEST", badRequestResponse);
+        } else {
+            await usersRepository.confirmUserAccount(data!._id);
+
+            return createServiceResultObj("SUCCESS", "OK")
+        }
+    },
+    async resendEmail(email: string) {
+        const {result, data} = await this.findUserByEmail(email);
+        if (result === "REJECT" ||
+            data!.emailConfirmation.isConfirmed ||
+            data!.emailConfirmation.expirationDate < new Date()) {
+            const badRequestResponse: TOutPutErrorsType = {
+                errorsMessages: [{field: 'email', message: 'some problem'}],
+            }
+
+            return createServiceResultObj<TOutPutErrorsType>("REJECT", "BAD_REQUEST", badRequestResponse);
         }
 
-        const insertedId = await usersRepository.createUser(newUser);
+        const newConfirmationCode = uuidV4();
 
-        return createServiceResultObj<string>("SUCCESS", "CREATED", insertedId);
+        await usersRepository.updateUserConfirmationCode(data!._id, newConfirmationCode);
+
+        const emailHtml = `<h1>Hello ${data!.accountData.login}</h1> <p><a href="https://some-url.com/confirm-registration?code=${newConfirmationCode}"></a>Click to confirm your email</p>`
+
+        sendEmailService.sendEmail(email, 'Confirm your Email', emailHtml)
+            .catch(e => console.log('СARAMBA!!!: ', e));
+
+        return createServiceResultObj("SUCCESS", "OK");
+
     },
     async deleteUser(id: string): Promise<TResultServiceObj> {
         const isDelete = await usersRepository.deleteUser(id);
@@ -57,8 +130,8 @@ export const usersService = {
             return createServiceResultObj("REJECT", "NOT_FOUND");
         }
 
-        const passwordHash = await this.createPasswordHash(password, user.salt);
-        if (passwordHash !== user.passwordHash) {
+        const passwordHash = await this.createPasswordHash(password, user.accountData.salt);
+        if (passwordHash !== user.accountData.passwordHash) {
             return createServiceResultObj("REJECT", "NOT_AUTH");
         }
 
@@ -76,6 +149,14 @@ export const usersService = {
     },
     async findUserByEmail(email: string): Promise<TResultServiceObj<TUserDB>> {
         const user = await usersRepository.findUserByEmail(email);
+
+        if (user) {
+            return createServiceResultObj<TUserDB>("SUCCESS", "OK", user);
+        }
+        return createServiceResultObj("REJECT", "NOT_FOUND");
+    },
+    async findUserByConfirmationCode(code: string): Promise<TResultServiceObj<TUserDB>> {
+        const user = await usersRepository.findUserByConfirmationCode(code);
 
         if (user) {
             return createServiceResultObj<TUserDB>("SUCCESS", "OK", user);

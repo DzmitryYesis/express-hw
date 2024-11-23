@@ -1,3 +1,2 @@
-export * from './GetUsersController';
-export * from './CreateUserController';
-export * from './DeleteUserController';
+export * from './authControllers';
+export * from './userControllers';
