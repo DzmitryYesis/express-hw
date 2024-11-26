@@ -35,7 +35,7 @@ export const usersService = {
                     hours: 1,
                     minutes: 3,
                 }),
-                isConfirmed: false,
+                isConfirmed: isAdmin,
             }
         }
 
