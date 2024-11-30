@@ -1,10 +1,12 @@
 import {TErrorMessage, TInputUser, TLoginUser, TOutPutErrorsType, TResultServiceObj} from "../../types";
 import bcrypt from "bcrypt";
-import {TUserDB} from "../../db";
+import {TRefreshTokenDB, TUserDB} from "../../db";
 import {usersRepository} from "./users-repository";
 import {createServiceResultObj, jwtService, sendEmailService} from "../../utils";
 import {v4 as uuidV4} from "uuid";
 import {add} from "date-fns";
+import {refreshTokenRepository} from "./refresh-token-repository";
+import {SETTINGS} from "../../settings";
 
 export const usersService = {
     async createUser(data: TInputUser, isAdmin = false): Promise<TResultServiceObj<TOutPutErrorsType | string>> {
@@ -19,7 +21,7 @@ export const usersService = {
         }
 
         const salt = await bcrypt.genSalt(10);
-        const passwordHash = await this.createPasswordHash(data.password, salt)
+        const passwordHash = await this.createHash(data.password, salt)
 
         const newUser: Omit<TUserDB, '_id'> = {
             accountData: {
@@ -124,20 +126,66 @@ export const usersService = {
             return createServiceResultObj("REJECT", "NOT_FOUND");
         }
     },
-    async loginUser(loginOrEmail: string, password: string): Promise<TResultServiceObj<TLoginUser>> {
+    async loginUser(loginOrEmail: string, password: string, device: string): Promise<TResultServiceObj<TLoginUser & {
+        refreshToken: string
+    }>> {
         const user = await usersRepository.findUserByLoginOrEmail(loginOrEmail);
         if (!user) {
             return createServiceResultObj("REJECT", "NOT_FOUND");
         }
 
-        const passwordHash = await this.createPasswordHash(password, user.accountData.salt);
+        const passwordHash = await this.createHash(password, user.accountData.salt);
         if (passwordHash !== user.accountData.passwordHash) {
             return createServiceResultObj("REJECT", "NOT_AUTH");
         }
 
-        const token = await jwtService.createJWT(user);
+        const token = await jwtService.createAccessJWT(user._id);
+        const refreshTokenData = await jwtService.createRefreshJWT();
+        const refreshTokenDto: Omit<TRefreshTokenDB, '_id'> = {
+            userId: user._id,
+            refreshToken: refreshTokenData,
+            createdAt: new Date(),
+            device: device,
+            isValid: true
+        };
 
-        return createServiceResultObj<TLoginUser>("SUCCESS", "OK", {accessToken: token});
+        await refreshTokenRepository.addRefreshToken(refreshTokenDto);
+
+        return createServiceResultObj<TLoginUser & { refreshToken: string }>("SUCCESS", "OK", {
+            accessToken: token,
+            refreshToken: refreshTokenData
+        });
+    },
+    async logoutUser(refreshToken: string): Promise<TResultServiceObj> {
+        const currentRefreshToken = await refreshTokenRepository.findRefreshToken(refreshToken);
+
+        if (currentRefreshToken) {
+            await refreshTokenRepository.updateRefreshTokenData({...currentRefreshToken, isValid: false})
+            return createServiceResultObj("SUCCESS", "NO_CONTENT");
+        }
+
+        return createServiceResultObj("REJECT", "NOT_AUTH");
+    },
+    async updateTokens(refreshToken: string): Promise<TResultServiceObj<TLoginUser & {
+        refreshToken: string
+    }>> {
+        const currentRefreshToken = await refreshTokenRepository.findRefreshToken(refreshToken);
+        if (currentRefreshToken) {
+            const newAccessToken = await jwtService.createAccessJWT(currentRefreshToken.userId);
+            const newRefreshToken = await jwtService.createRefreshJWT();
+            await refreshTokenRepository.updateRefreshTokenData({
+                ...currentRefreshToken,
+                refreshToken: newRefreshToken,
+                createdAt: new Date(),
+                isValid: true
+            })
+
+            return createServiceResultObj<TLoginUser & {
+                refreshToken: string
+            }>("SUCCESS", "OK", {accessToken: newAccessToken, refreshToken: newRefreshToken})
+        }
+
+        return createServiceResultObj("REJECT", "NOT_AUTH");
     },
     async findUserByLogin(login: string): Promise<TResultServiceObj<TUserDB>> {
         const user = await usersRepository.findUserByLogin(login);
@@ -163,7 +211,20 @@ export const usersService = {
         }
         return createServiceResultObj("REJECT", "NOT_FOUND");
     },
-    async createPasswordHash(password: string, salt: string): Promise<string> {
-        return await bcrypt.hash(password, salt);
+    async createHash(data: string, salt: string): Promise<string> {
+        return await bcrypt.hash(data, salt);
+    },
+    async isRefreshTokenValid(refreshToken: string): Promise<TResultServiceObj<TRefreshTokenDB>> {
+        const refreshTokenData = await refreshTokenRepository.findRefreshToken(refreshToken);
+        if (!refreshTokenData || !refreshTokenData.isValid) {
+            return createServiceResultObj("REJECT", "NOT_AUTH");
+        }
+        const isRefreshTokenExpired = await jwtService.isTokenExpired(refreshToken, SETTINGS.JWT_REFRESH_TOKEN_SECRET);
+        if (isRefreshTokenExpired) {
+            await refreshTokenRepository.updateRefreshTokenData({...refreshTokenData, isValid: false})
+            return createServiceResultObj("REJECT", "NOT_AUTH");
+        }
+
+        return createServiceResultObj<TRefreshTokenDB>("SUCCESS", "OK", refreshTokenData);
     }
 }
