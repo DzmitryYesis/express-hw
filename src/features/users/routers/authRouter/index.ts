@@ -6,12 +6,19 @@ import {
     authLoginValidator,
     authPasswordValidator
 } from "../../middlewares";
-import {authBearerMiddleware, inputCheckErrorsMiddleware} from "../../../../global-middlewares";
+import {
+    authBearerMiddleware,
+    authRefreshTokenMiddleware,
+    inputCheckErrorsMiddleware
+} from "../../../../global-middlewares";
 import {
     LoginController,
     GetPersonalDataController,
     RegistrationUserController,
-    RegistrationConfirmationCodeController, RegistrationEmailResendingController
+    RegistrationConfirmationCodeController,
+    RegistrationEmailResendingController,
+    UpdateTokensController,
+    LogoutController
 } from "../../controllers";
 
 export const authRouter = Router();
@@ -27,6 +34,16 @@ authRouter.post('/login',
     inputCheckErrorsMiddleware,
     LoginController
 );
+
+authRouter.post('/refresh-token',
+    authRefreshTokenMiddleware,
+    UpdateTokensController
+    );
+
+authRouter.post('/logout',
+    authRefreshTokenMiddleware,
+    LogoutController
+    )
 
 authRouter.post('/registration',
     authLoginValidator,

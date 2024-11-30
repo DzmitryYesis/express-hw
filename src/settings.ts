@@ -4,8 +4,11 @@ config()
 
 export const SETTINGS = {
     PORT: process.env.PORT,
-    JWT_SECRET: process.env.JWT_SECRET || 'qwerqwer',
-    JWT_EXPIRES_TIME: '10m',
+    REFRESH_TOKEN_NAME: 'refreshToken',
+    JWT_ACCESS_TOKEN_SECRET: process.env.JWT_ACCESS_SECRET || 'qwerqwer',
+    JWT_REFRESH_TOKEN_SECRET: process.env.JWT_REFRESH_SECRET || 'sfghsftbhsf',
+    JWT_ACCESS_TOKEN_EXPIRES_TIME: '10s',
+    JWT_REFRESH_TOKEN_EXPIRES_TIME: '20s',
     PATH: {
         BLOGS: '/blogs',
         POSTS: '/posts',
@@ -21,4 +24,5 @@ export const SETTINGS = {
     DB_COLLECTION_POSTS_NAME: 'postsCollection',
     DB_COLLECTION_USERS_NAME: 'usersCollection',
     DB_COLLECTION_COMMENTS_NAME: 'commentsCollection',
+    DB_COLLECTION_REFRESH_TOKEN_NAME: 'refreshTokenCollection',
 }

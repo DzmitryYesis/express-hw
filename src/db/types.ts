@@ -45,3 +45,12 @@ export type TCommentDB = {
     postId: string,
     createdAt: string,
 }
+
+export type TRefreshTokenDB = {
+    _id: ObjectId,
+    userId: ObjectId,
+    refreshToken: string,
+    createdAt: Date,
+    device: string
+    isValid: boolean,
+}
