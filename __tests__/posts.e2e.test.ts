@@ -1,5 +1,5 @@
 import {SETTINGS} from '../src/settings';
-import {req} from './test-helper';
+import {req} from './helpers/test-helper';
 import {HttpStatusCodeEnum} from '../src/constants';
 import {blogForTest, postForTest} from './dataset';
 import {TErrorMessage, TInputPost, TBlog, TPost} from '../src/types';
