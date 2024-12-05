@@ -20,7 +20,7 @@ export const postContentValidator = body('content')
     .trim()
     .isString()
     .withMessage('Must be a string')
-    .isLength({min: 1, max: 100})
+    .isLength({min: 1, max: 1000})
     .withMessage('Length must be from 1 to 1000')
 
 export const postIdValidator = param('id')

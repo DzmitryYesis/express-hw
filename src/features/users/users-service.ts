@@ -59,10 +59,10 @@ export const usersService = {
         const errors: TErrorMessage[] = [];
 
         if (findUserByLoginResult === "SUCCESS") {
-            errors.push({field: 'login', message: 'login not unique error message'})
+            errors.push({field: 'login', message: 'not unique'})
         }
         if (findUserByEmailResult === "SUCCESS") {
-            errors.push({field: 'email', message: 'email not unique error message'})
+            errors.push({field: 'email', message: 'not unique'})
         }
 
         if (errors.length > 0) {

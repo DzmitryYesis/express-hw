@@ -5,7 +5,10 @@ import {
     invalidBlogId,
     createdBlog,
     createdBlogs,
-    req, createPostForBlogByIdInputBody, createdPostForBlogByBlogId, createdPostsForBlogByBlogId
+    req,
+    createPostForBlogByIdInputBody,
+    createdPostForBlogByBlogId,
+    createdPostsForBlogByBlogId
 } from './helpers';
 import {SETTINGS} from '../src/settings';
 import {HttpStatusCodeEnum} from '../src/constants';
