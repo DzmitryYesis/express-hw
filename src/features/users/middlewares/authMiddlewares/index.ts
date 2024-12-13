@@ -4,6 +4,8 @@ export const authLoginOrEmailValidator = body('loginOrEmail')
     .trim()
     .isString()
     .withMessage('Must be a string')
+    .isLength({min: 3})
+    .withMessage('Length must be min 3 characters')
 
 export const authConfirmationCodeValidator = body('code')
     .trim()
