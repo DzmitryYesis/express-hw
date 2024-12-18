@@ -1,11 +1,11 @@
 import {TErrorMessage, TInputUser, TLoginUser, TOutPutErrorsType, TResultServiceObj} from "../../types";
 import bcrypt from "bcrypt";
-import {TRefreshTokenDB, TUserDB} from "../../db";
+import {TSessionsDB, TUserDB} from "../../db";
 import {usersRepository} from "./users-repository";
 import {createServiceResultObj, jwtService, sendEmailService} from "../../utils";
 import {v4 as uuidV4} from "uuid";
 import {add} from "date-fns";
-import {refreshTokenRepository} from "./refresh-token-repository";
+import {sessionsRepository} from "./sessions-repository";
 import {SETTINGS} from "../../settings";
 
 export const usersService = {
@@ -126,7 +126,7 @@ export const usersService = {
             return createServiceResultObj("REJECT", "NOT_FOUND");
         }
     },
-    async loginUser(loginOrEmail: string, password: string, device: string): Promise<TResultServiceObj<TLoginUser & {
+    async loginUser(loginOrEmail: string, password: string, ip: string, device: string): Promise<TResultServiceObj<TLoginUser & {
         refreshToken: string
     }>> {
         const user = await usersRepository.findUserByLoginOrEmail(loginOrEmail);
@@ -140,27 +140,31 @@ export const usersService = {
         }
 
         const token = await jwtService.createAccessJWT(user._id);
-        const refreshTokenData = await jwtService.createRefreshJWT();
-        const refreshTokenDto: Omit<TRefreshTokenDB, '_id'> = {
+        const deviceId = uuidV4();
+        const {refreshToken, iat, exp} = await jwtService.createRefreshJWT(deviceId);
+        const sessionDto: Omit<TSessionsDB, '_id'> = {
             userId: user._id,
-            refreshToken: refreshTokenData,
-            createdAt: new Date(),
-            device: device,
-            isValid: true
+            deviceName: device || 'Unknown device',
+            ip,
+            deviceId,
+            exp,
+            iat
         };
 
-        await refreshTokenRepository.addRefreshToken(refreshTokenDto);
+        await sessionsRepository.addSession(sessionDto);
 
         return createServiceResultObj<TLoginUser & { refreshToken: string }>("SUCCESS", "OK", {
             accessToken: token,
-            refreshToken: refreshTokenData
+            refreshToken
         });
     },
     async logoutUser(refreshToken: string): Promise<TResultServiceObj> {
-        const currentRefreshToken = await refreshTokenRepository.findRefreshToken(refreshToken);
 
-        if (currentRefreshToken) {
-            await refreshTokenRepository.updateRefreshTokenData({...currentRefreshToken, isValid: false})
+        const {deviceId, iat} = await jwtService.decodeRefreshToken(refreshToken.replace('refreshToken=', ''));
+        const currentSession = await sessionsRepository.findSession(deviceId, iat);
+
+        if (currentSession) {
+            await sessionsRepository.deleteSession(deviceId, iat);
             return createServiceResultObj("SUCCESS", "NO_CONTENT");
         }
 
@@ -169,15 +173,16 @@ export const usersService = {
     async updateTokens(refreshToken: string): Promise<TResultServiceObj<TLoginUser & {
         refreshToken: string
     }>> {
-        const currentRefreshToken = await refreshTokenRepository.findRefreshToken(refreshToken);
-        if (currentRefreshToken) {
-            const newAccessToken = await jwtService.createAccessJWT(currentRefreshToken.userId);
-            const newRefreshToken = await jwtService.createRefreshJWT();
-            await refreshTokenRepository.updateRefreshTokenData({
-                ...currentRefreshToken,
-                refreshToken: newRefreshToken,
-                createdAt: new Date(),
-                isValid: true
+        const {deviceId, iat} = await jwtService.decodeRefreshToken(refreshToken);
+        const currentSession = await sessionsRepository.findSession(deviceId, iat);
+
+        if (currentSession) {
+            const newAccessToken = await jwtService.createAccessJWT(currentSession.userId);
+            const {refreshToken: newRefreshToken, iat, exp} = await jwtService.createRefreshJWT(currentSession.deviceId);
+            await sessionsRepository.updateSessionData({
+                ...currentSession,
+                iat,
+                exp
             })
 
             return createServiceResultObj<TLoginUser & {
@@ -214,17 +219,18 @@ export const usersService = {
     async createHash(data: string, salt: string): Promise<string> {
         return await bcrypt.hash(data, salt);
     },
-    async isRefreshTokenValid(refreshToken: string): Promise<TResultServiceObj<TRefreshTokenDB>> {
-        const refreshTokenData = await refreshTokenRepository.findRefreshToken(refreshToken);
-        if (!refreshTokenData || !refreshTokenData.isValid) {
+    async isRefreshTokenValid(refreshToken: string): Promise<TResultServiceObj<TSessionsDB>> {
+        const {deviceId, iat} = await jwtService.decodeRefreshToken(refreshToken);
+        const sessionData = await sessionsRepository.findSession(deviceId, iat);
+        if (!sessionData) {
             return createServiceResultObj("REJECT", "NOT_AUTH");
         }
         const isRefreshTokenExpired = await jwtService.isTokenExpired(refreshToken, SETTINGS.JWT_REFRESH_TOKEN_SECRET);
         if (isRefreshTokenExpired) {
-            await refreshTokenRepository.updateRefreshTokenData({...refreshTokenData, isValid: false})
+            await sessionsRepository.deleteSession(deviceId, iat);
             return createServiceResultObj("REJECT", "NOT_AUTH");
         }
 
-        return createServiceResultObj<TRefreshTokenDB>("SUCCESS", "OK", refreshTokenData);
+        return createServiceResultObj<TSessionsDB>("SUCCESS", "OK");
     }
 }

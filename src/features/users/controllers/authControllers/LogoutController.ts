@@ -4,7 +4,7 @@ import {HttpStatusCodeEnum} from "../../../../constants";
 import {SETTINGS} from "../../../../settings";
 
 export const LogoutController = async (req: Request, res: Response) => {
-    const {result} = await usersService.logoutUser(req.cookies[SETTINGS.REFRESH_TOKEN_NAME]);
+    const {result} = await usersService.logoutUser(req.cookies[SETTINGS.REFRESH_TOKEN_NAME].replace('refreshToken=', ''));
 
     if (result === "SUCCESS") {
         res.status(HttpStatusCodeEnum.NO_CONTENT_204).end()

@@ -5,7 +5,7 @@ import {HttpStatusCodeEnum} from "../../../../constants";
 import {SETTINGS} from "../../../../settings";
 
 export const UpdateTokensController = async (req: Request, res: Response<TLoginUser>) => {
-    const {result, data} = await usersService.updateTokens(req.cookies[SETTINGS.REFRESH_TOKEN_NAME])
+    const {result, data} = await usersService.updateTokens(req.cookies[SETTINGS.REFRESH_TOKEN_NAME].replace('refreshToken=', ''))
 
     if (result === "SUCCESS" && data) {
         res.cookie(SETTINGS.REFRESH_TOKEN_NAME, data.refreshToken, {httpOnly: true, secure: true})

@@ -9,7 +9,7 @@ export const LoginController = async (req: RequestWithBody<TInputLogin>, res: Re
     const {
         result,
         data
-    } = await usersService.loginUser(req.body.loginOrEmail, req.body.password, req.headers['user-agent']!);
+    } = await usersService.loginUser(req.body.loginOrEmail, req.body.password, req.ip!, req.headers['user-agent']!);
 
     if (result === "SUCCESS" && data) {
         res.cookie(SETTINGS.REFRESH_TOKEN_NAME, data.refreshToken, {httpOnly: true, secure: true})
