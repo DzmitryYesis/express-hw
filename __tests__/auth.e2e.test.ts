@@ -12,6 +12,7 @@ import {SETTINGS} from "../src/settings";
 import {HttpStatusCodeEnum} from "../src/constants";
 import {TErrorMessage, TLoginUser, TPersonalData} from "../src/types";
 import dotenv from "dotenv";
+import {jwtService} from "../src/utils";
 
 dotenv.config()
 
@@ -154,7 +155,7 @@ describe('tests for auth endpoints', () => {
     })
 
     it('should return response new accessToken and refreshToken', async () => {
-        const {refreshTokenCookie} = await loggedInUser(1);
+        const {refreshTokenCookie, accessToken} = await loggedInUser(1);
 
         const res = await req
             .post(`${SETTINGS.PATH.AUTH}/refresh-token`)
@@ -166,6 +167,16 @@ describe('tests for auth endpoints', () => {
         expect(res.body).toStrictEqual({accessToken: expect.any(String)} as TLoginUser);
         //TODO fix problem with equality
         /*expect(res.body.accessToken).not.toEqual(accessToken);*/
+        /*const {iat: iatAccessToken} = await jwtService.decodeAccessToken(accessToken);
+        const {iat: newIatAccessToken} = await jwtService.decodeAccessToken(res.body.accessToken);
+
+        console.log('newIatAccessToken', newIatAccessToken)
+        console.log('iatAccessToken', iatAccessToken)
+
+        expect(newIatAccessToken).not.toEqual(iatAccessToken);
+
+        console.log('newIatAccessToken', newIatAccessToken)
+        console.log('iatAccessToken', iatAccessToken)*/
 
         const cookies = res.headers['set-cookie'] as unknown as string[];
         const newRefreshTokenCookie = cookies.find(cookie => cookie.startsWith('refreshToken='));
@@ -173,6 +184,10 @@ describe('tests for auth endpoints', () => {
         expect(newRefreshTokenCookie).toStrictEqual(expect.any(String));
         //TODO fix problem with equality
         /*expect(newRefreshTokenCookie).not.toEqual(refreshTokenCookie!);*/
+
+        /*const {iat: iatRefreshToken} = await jwtService.decodeRefreshToken(refreshTokenCookie!);
+        const {iat: newIatRefreshToken} = await jwtService.decodeRefreshToken(newRefreshTokenCookie!.replace('refreshToken=', ''));
+        expect(newIatRefreshToken).not.toEqual(iatRefreshToken);*/
     })
 
     it('should return response NOT_AUTH_401 error', async () => {

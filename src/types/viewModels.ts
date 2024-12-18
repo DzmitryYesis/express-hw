@@ -43,3 +43,10 @@ export type TComment = {
     },
     createdAt: string
 }
+
+export type TDevice = {
+    ip: string,
+    title: string,
+    lastActiveDate: string,
+    deviceId: string
+}

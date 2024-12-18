@@ -141,7 +141,7 @@ export const usersService = {
 
         const token = await jwtService.createAccessJWT(user._id);
         const deviceId = uuidV4();
-        const {refreshToken, iat, exp} = await jwtService.createRefreshJWT(deviceId);
+        const {refreshToken, iat, exp} = await jwtService.createRefreshJWT(deviceId, user._id.toString());
         const sessionDto: Omit<TSessionsDB, '_id'> = {
             userId: user._id,
             deviceName: device || 'Unknown device',
@@ -164,7 +164,7 @@ export const usersService = {
         const currentSession = await sessionsRepository.findSession(deviceId, iat);
 
         if (currentSession) {
-            await sessionsRepository.deleteSession(deviceId, iat);
+            await sessionsRepository.deleteSessionByDeviceIdAndIat(deviceId, iat);
             return createServiceResultObj("SUCCESS", "NO_CONTENT");
         }
 
@@ -178,7 +178,11 @@ export const usersService = {
 
         if (currentSession) {
             const newAccessToken = await jwtService.createAccessJWT(currentSession.userId);
-            const {refreshToken: newRefreshToken, iat, exp} = await jwtService.createRefreshJWT(currentSession.deviceId);
+            const {
+                refreshToken: newRefreshToken,
+                iat,
+                exp
+            } = await jwtService.createRefreshJWT(currentSession.deviceId, currentSession.userId.toString());
             await sessionsRepository.updateSessionData({
                 ...currentSession,
                 iat,
@@ -227,10 +231,45 @@ export const usersService = {
         }
         const isRefreshTokenExpired = await jwtService.isTokenExpired(refreshToken, SETTINGS.JWT_REFRESH_TOKEN_SECRET);
         if (isRefreshTokenExpired) {
-            await sessionsRepository.deleteSession(deviceId, iat);
+            await sessionsRepository.deleteSessionByDeviceIdAndIat(deviceId, iat);
             return createServiceResultObj("REJECT", "NOT_AUTH");
         }
 
         return createServiceResultObj<TSessionsDB>("SUCCESS", "OK");
+    },
+    async deleteDevicesExcludeCurrent(refreshToken: string): Promise<TResultServiceObj> {
+        const {userId, deviceId} = await jwtService.decodeRefreshToken(refreshToken);
+
+        const isDelete = await sessionsRepository.deleteSessionsExcludeCurrent(deviceId, userId);
+
+        if (isDelete) {
+            return createServiceResultObj("SUCCESS", "NO_CONTENT")
+        } else {
+            return createServiceResultObj("REJECT", "NOT_FOUND");
+        }
+    },
+    async deleteDeviceById(deviceId: string, refreshToken: string): Promise<TResultServiceObj> {
+        const {userId} = await jwtService.decodeRefreshToken(refreshToken);
+        const {result, status, data} = await this.findSessionByDeviceIdAndUserId(deviceId, userId);
+
+        if (result === "SUCCESS") {
+            if (data && data.userId.toString() === userId) {
+                await sessionsRepository.deleteSessionById(data._id)
+
+                return createServiceResultObj("SUCCESS", "NO_CONTENT");
+            }
+
+            return createServiceResultObj("REJECT", "FORBIDDEN")
+        }
+
+        return createServiceResultObj(result, status);
+    },
+    async findSessionByDeviceIdAndUserId(deviceId: string, userId: string): Promise<TResultServiceObj<TSessionsDB>> {
+        const session = await sessionsRepository.findSessionByDeviceIdAndUserId(deviceId, userId);
+
+        if (session) {
+            return createServiceResultObj<TSessionsDB>("SUCCESS", "OK", session);
+        }
+        return createServiceResultObj("REJECT", "NOT_FOUND");
     }
 }

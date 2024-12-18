@@ -1,4 +1,5 @@
 import {sessionsCollection, TSessionsDB} from "../../db";
+import {ObjectId} from "mongodb";
 
 export const sessionsRepository = {
     async addSession(data: Omit<TSessionsDB, '_id'>): Promise<string> {
@@ -9,9 +10,22 @@ export const sessionsRepository = {
     async findSession(deviceId: string, iat: number): Promise<TSessionsDB | null> {
         return await sessionsCollection.findOne({deviceId, iat})
     },
-    async deleteSession(deviceId: string, iat: number): Promise<number> {
+    async findSessionByDeviceIdAndUserId(deviceId: string, userId: string): Promise<TSessionsDB | null> {
+        return await sessionsCollection.findOne({deviceId, userId: new ObjectId(userId)});
+    },
+    async deleteSessionById(id: ObjectId): Promise<boolean> {
+        const result = await sessionsCollection.deleteOne({id})
+
+        return result.deletedCount === 1
+    },
+    async deleteSessionByDeviceIdAndIat(deviceId: string, iat: number): Promise<number> {
         const result = await sessionsCollection.deleteOne({deviceId, iat})
         return result.deletedCount;
+    },
+    async deleteSessionsExcludeCurrent(deviceId: string, userId: string): Promise<boolean> {
+        const result = await sessionsCollection.deleteMany({userId: new ObjectId(userId), deviceId: {$ne: deviceId}});
+
+        return result.deletedCount > 0;
     },
     async updateSessionData(data: TSessionsDB): Promise<boolean> {
         const result = await sessionsCollection.updateOne({_id: data._id}, {$set: {...data}});
