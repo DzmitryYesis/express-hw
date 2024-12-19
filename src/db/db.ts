@@ -1,4 +1,4 @@
-import {TBlogDB, TCommentDB, TPostDB, TRefreshTokenDB, TUserDB} from './types';
+import {TBlogDB, TCommentDB, TLogRequestsDB, TPostDB, TSessionsDB, TUserDB} from './types';
 import {MongoClient} from 'mongodb';
 import {SETTINGS} from '../settings';
 import dotenv from 'dotenv'
@@ -14,7 +14,8 @@ export const blogsCollection = db.collection<TBlogDB>(SETTINGS.DB_COLLECTION_BLO
 export const postsCollection = db.collection<TPostDB>(SETTINGS.DB_COLLECTION_POSTS_NAME);
 export const usersCollection = db.collection<TUserDB>(SETTINGS.DB_COLLECTION_USERS_NAME);
 export const commentsCollection = db.collection<TCommentDB>(SETTINGS.DB_COLLECTION_COMMENTS_NAME);
-export const refreshTokenCollection = db.collection<TRefreshTokenDB>(SETTINGS.DB_COLLECTION_COMMENTS_NAME);
+export const sessionsCollection = db.collection<TSessionsDB>(SETTINGS.DB_COLLECTION_SESSIONS_NAME);
+export const logRequestsCollection = db.collection<TLogRequestsDB>(SETTINGS.DB_COLLECTION_LOG_REQUESTS_NAME)
 // проверка подключения к бд
 export const connectToDB = async () => {
     try {

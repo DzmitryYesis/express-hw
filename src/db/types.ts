@@ -46,11 +46,19 @@ export type TCommentDB = {
     createdAt: string,
 }
 
-export type TRefreshTokenDB = {
+export type TSessionsDB = {
     _id: ObjectId,
     userId: ObjectId,
-    refreshToken: string,
-    createdAt: Date,
-    device: string
-    isValid: boolean,
+    exp: number,
+    iat: number,
+    deviceId: string,
+    deviceName: string
+    ip: string,
+}
+
+export type TLogRequestsDB = {
+    _id: ObjectId,
+    ip: string,
+    url: string
+    date: Date
 }

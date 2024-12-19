@@ -14,6 +14,7 @@ export const SETTINGS = {
         POSTS: '/posts',
         USERS: '/users',
         AUTH: '/auth',
+        SECURITY: '/security/devices',
         COMMENTS: '/comments',
         TESTING: '/testing/all-data'
     },
@@ -24,5 +25,6 @@ export const SETTINGS = {
     DB_COLLECTION_POSTS_NAME: 'postsCollection',
     DB_COLLECTION_USERS_NAME: 'usersCollection',
     DB_COLLECTION_COMMENTS_NAME: 'commentsCollection',
-    DB_COLLECTION_REFRESH_TOKEN_NAME: 'refreshTokenCollection',
+    DB_COLLECTION_SESSIONS_NAME: 'sessionsCollection',
+    DB_COLLECTION_LOG_REQUESTS_NAME: 'logRequestsCollection',
 }

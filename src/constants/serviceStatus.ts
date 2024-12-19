@@ -10,5 +10,6 @@ export enum ServiceStatusCodeEnum {
     BAD_REQUEST = 'BAD_REQUEST',
     NOT_AUTH = 'NOT_AUTH',
     FORBIDDEN = 'FORBIDDEN',
-    NOT_FOUND = 'NOT_FOUND'
+    NOT_FOUND = 'NOT_FOUND',
+    TO_MANY_REQUESTS = 'TO_MANY_REQUESTS'
 }
