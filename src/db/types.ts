@@ -55,3 +55,10 @@ export type TSessionsDB = {
     deviceName: string
     ip: string,
 }
+
+export type TLogRequestsDB = {
+    _id: ObjectId,
+    ip: string,
+    url: string
+    date: Date
+}

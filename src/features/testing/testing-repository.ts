@@ -1,4 +1,11 @@
-import {blogsCollection, commentsCollection, postsCollection, sessionsCollection, usersCollection} from '../../db';
+import {
+    blogsCollection,
+    commentsCollection,
+    logRequestsCollection,
+    postsCollection,
+    sessionsCollection,
+    usersCollection
+} from '../../db';
 
 export const testingRepository = {
     async deleteAllData() {
@@ -7,5 +14,6 @@ export const testingRepository = {
         await usersCollection.deleteMany({});
         await commentsCollection.deleteMany({});
         await sessionsCollection.deleteMany({});
+        await logRequestsCollection.deleteMany({});
     }
 }

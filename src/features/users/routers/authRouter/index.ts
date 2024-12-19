@@ -9,7 +9,8 @@ import {
 import {
     authBearerMiddleware,
     authRefreshTokenMiddleware,
-    inputCheckErrorsMiddleware
+    inputCheckErrorsMiddleware,
+    logRequestMiddleware
 } from "../../../../global-middlewares";
 import {
     LoginController,
@@ -29,6 +30,7 @@ authRouter.get('/me',
 )
 
 authRouter.post('/login',
+    logRequestMiddleware,
     authLoginOrEmailValidator,
     authPasswordValidator,
     inputCheckErrorsMiddleware,
@@ -46,6 +48,7 @@ authRouter.post('/logout',
     )
 
 authRouter.post('/registration',
+    logRequestMiddleware,
     authLoginValidator,
     authPasswordValidator,
     authEmailValidator,
@@ -54,12 +57,14 @@ authRouter.post('/registration',
 );
 
 authRouter.post('/registration-confirmation',
+    logRequestMiddleware,
     authConfirmationCodeValidator,
     inputCheckErrorsMiddleware,
     RegistrationConfirmationCodeController
 );
 
 authRouter.post('/registration-email-resending',
+    logRequestMiddleware,
     authEmailValidator,
     inputCheckErrorsMiddleware,
     RegistrationEmailResendingController

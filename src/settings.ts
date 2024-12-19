@@ -26,4 +26,5 @@ export const SETTINGS = {
     DB_COLLECTION_USERS_NAME: 'usersCollection',
     DB_COLLECTION_COMMENTS_NAME: 'commentsCollection',
     DB_COLLECTION_SESSIONS_NAME: 'sessionsCollection',
+    DB_COLLECTION_LOG_REQUESTS_NAME: 'logRequestsCollection',
 }
