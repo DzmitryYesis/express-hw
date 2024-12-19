@@ -248,9 +248,8 @@ export const usersService = {
             return createServiceResultObj("REJECT", "NOT_FOUND");
         }
     },
-    async deleteDeviceById(deviceId: string, refreshToken: string): Promise<TResultServiceObj> {
-        const {userId} = await jwtService.decodeRefreshToken(refreshToken);
-        const {result, status, data} = await this.findSessionByDeviceIdAndUserId(deviceId, userId);
+    async deleteDeviceById(deviceId: string, userId: string): Promise<TResultServiceObj> {
+        const {result, status, data} = await this.findSessionByDeviceId(deviceId);
 
         if (result === "SUCCESS") {
             if (data && data.userId.toString() === userId) {
@@ -264,8 +263,8 @@ export const usersService = {
 
         return createServiceResultObj(result, status);
     },
-    async findSessionByDeviceIdAndUserId(deviceId: string, userId: string): Promise<TResultServiceObj<TSessionsDB>> {
-        const session = await sessionsRepository.findSessionByDeviceIdAndUserId(deviceId, userId);
+    async findSessionByDeviceId(deviceId: string): Promise<TResultServiceObj<TSessionsDB>> {
+        const session = await sessionsRepository.findSessionByDeviceId(deviceId);
 
         if (session) {
             return createServiceResultObj<TSessionsDB>("SUCCESS", "OK", session);

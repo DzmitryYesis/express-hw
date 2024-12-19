@@ -2,8 +2,6 @@ import {TInputLogin, TInputUser} from "../../src/types/inputModels";
 import {SETTINGS} from "../../src/settings";
 import {authBasic, req} from "./test-helper";
 import {TLoginUser, TUser} from "../../src/types/viewModels";
-import {MongoClient} from "mongodb";
-import {TUserDB} from "../../src/db";
 
 export const invalidRefreshToken = 'refreshToken=invalidtoken';
 

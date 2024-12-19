@@ -10,8 +10,8 @@ export const sessionsRepository = {
     async findSession(deviceId: string, iat: number): Promise<TSessionsDB | null> {
         return await sessionsCollection.findOne({deviceId, iat})
     },
-    async findSessionByDeviceIdAndUserId(deviceId: string, userId: string): Promise<TSessionsDB | null> {
-        return await sessionsCollection.findOne({deviceId, userId: new ObjectId(userId)});
+    async findSessionByDeviceId(deviceId: string): Promise<TSessionsDB | null> {
+        return await sessionsCollection.findOne({deviceId});
     },
     async deleteSessionById(id: ObjectId): Promise<boolean> {
         const result = await sessionsCollection.deleteOne({id})

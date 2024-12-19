@@ -12,7 +12,6 @@ import {SETTINGS} from "../src/settings";
 import {HttpStatusCodeEnum} from "../src/constants";
 import {TErrorMessage, TLoginUser, TPersonalData} from "../src/types";
 import dotenv from "dotenv";
-import {jwtService} from "../src/utils";
 
 dotenv.config()
 
@@ -155,7 +154,7 @@ describe('tests for auth endpoints', () => {
     })
 
     it('should return response new accessToken and refreshToken', async () => {
-        const {refreshTokenCookie, accessToken} = await loggedInUser(1);
+        const {refreshTokenCookie} = await loggedInUser(1);
 
         const res = await req
             .post(`${SETTINGS.PATH.AUTH}/refresh-token`)
