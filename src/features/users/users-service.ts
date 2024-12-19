@@ -253,7 +253,7 @@ export const usersService = {
 
         if (result === "SUCCESS") {
             if (data && data.userId.toString() === userId) {
-                await sessionsRepository.deleteSessionById(data._id)
+                await sessionsRepository.deleteSessionById(deviceId)
 
                 return createServiceResultObj("SUCCESS", "NO_CONTENT");
             }

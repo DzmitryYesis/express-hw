@@ -13,8 +13,8 @@ export const sessionsRepository = {
     async findSessionByDeviceId(deviceId: string): Promise<TSessionsDB | null> {
         return await sessionsCollection.findOne({deviceId});
     },
-    async deleteSessionById(id: ObjectId): Promise<boolean> {
-        const result = await sessionsCollection.deleteOne({id})
+    async deleteSessionById(deviceId: string): Promise<boolean> {
+        const result = await sessionsCollection.deleteOne({deviceId})
 
         return result.deletedCount === 1
     },
