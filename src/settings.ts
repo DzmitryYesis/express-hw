@@ -14,7 +14,7 @@ export const SETTINGS = {
         POSTS: '/posts',
         USERS: '/users',
         AUTH: '/auth',
-        SECURITY: '/security',
+        SECURITY: '/security/devices',
         COMMENTS: '/comments',
         TESTING: '/testing/all-data'
     },
