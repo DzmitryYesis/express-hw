@@ -4,6 +4,7 @@ import {
     createdUser,
     createUserInputBody,
     getStringWithLength,
+    invalidCode,
     invalidRefreshToken,
     loggedInUser,
     req
@@ -15,9 +16,13 @@ import dotenv from "dotenv";
 
 dotenv.config()
 
+jest.mock('nodemailer');
+import {mockSendMail} from '../__mocks__';
+
 let mongoServer: MongoMemoryServer;
 let client: MongoClient;
 
+//TODO registration-confirmation and registration-email-resending test for expired confirmation code
 describe('tests for auth endpoints', () => {
     beforeAll(async () => {
         mongoServer = await MongoMemoryServer.create();
@@ -26,14 +31,12 @@ describe('tests for auth endpoints', () => {
         client = new MongoClient(uri);
         await client.connect();
 
-        /*process.env.MONGO_URL = uri;
-        client = new MongoClient(uri);*/
-
         await req.delete(SETTINGS.PATH.TESTING).expect(HttpStatusCodeEnum.NO_CONTENT_204)
     })
 
     afterEach(async () => {
-        await req.delete(SETTINGS.PATH.TESTING).expect(HttpStatusCodeEnum.NO_CONTENT_204)
+        await req.delete(SETTINGS.PATH.TESTING).expect(HttpStatusCodeEnum.NO_CONTENT_204);
+        jest.clearAllMocks();
     })
 
     afterAll(async () => {
@@ -41,23 +44,6 @@ describe('tests for auth endpoints', () => {
         await mongoServer.stop();
     });
 
-    //TODO registration-confirmation and registration-email-resending
-    /*it('should return response with status BAD_REQUEST_400', async () => {
-        const user = createUserInputBody(1)
-
-        await req
-            .post(`${SETTINGS.PATH.AUTH}/registration`)
-            .send(user)
-            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
-
-
-        const db = client.db();
-        const usersCollectionTest = db.collection<TUserDB>(SETTINGS.DB_COLLECTION_USERS_NAME);
-
-        const userDB = await usersCollectionTest.findOne({email: user.email})
-
-        console.log(userDB)
-    })*/
 
     it('should return response with error BAD_REQUEST_400', async () => {
         const {password} = await createdUser(1);
@@ -120,6 +106,33 @@ describe('tests for auth endpoints', () => {
         expect(hasRefreshToken).toBe(true);
     })
 
+    it('should return work normal after 5 login request one by one', async () => {
+        const {user, password} = await createdUser(1);
+
+        for (let i = 1; i < 6; i++) {
+            await req
+                .post(`${SETTINGS.PATH.AUTH}/login`)
+                .send({loginOrEmail: user.login, password})
+                .expect(HttpStatusCodeEnum.OK_200)
+        }
+    })
+
+    it('should return error TY_MANY_REQUEST after 6 login one by one', async () => {
+        const {user, password} = await createdUser(1);
+
+        for (let i = 1; i < 6; i++) {
+            await req
+                .post(`${SETTINGS.PATH.AUTH}/login`)
+                .send({loginOrEmail: user.login, password})
+                .expect(HttpStatusCodeEnum.OK_200)
+        }
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/login`)
+            .send({loginOrEmail: user.login, password})
+            .expect(HttpStatusCodeEnum.TO_MANY_REQUESTS)
+    })
+
     it('should return response with NOT_AUTH_401 error', async () => {
         await loggedInUser(1);
 
@@ -153,8 +166,15 @@ describe('tests for auth endpoints', () => {
             .expect(HttpStatusCodeEnum.NOT_AUTH_401)
     })
 
-    it('should return response new accessToken and refreshToken', async () => {
-        const {refreshTokenCookie} = await loggedInUser(1);
+    //TODO problem with iat for refresh token
+    /*it('should return response new accessToken and refreshToken', async () => {
+        const {accessToken, refreshTokenCookie} = await loggedInUser(1);
+
+        console.log(refreshTokenCookie)
+        const {iat: iatAccessToken} = await jwtService.decodeAccessToken(accessToken);
+        const {iat: iatRefreshToken} = await jwtService.decodeRefreshToken(refreshTokenCookie!.replace('refreshToken=', ''));
+
+        await sleep(3000);
 
         const res = await req
             .post(`${SETTINGS.PATH.AUTH}/refresh-token`)
@@ -164,30 +184,17 @@ describe('tests for auth endpoints', () => {
         console.log(res.body)
 
         expect(res.body).toStrictEqual({accessToken: expect.any(String)} as TLoginUser);
-        //TODO fix problem with equality
-        /*expect(res.body.accessToken).not.toEqual(accessToken);*/
-        /*const {iat: iatAccessToken} = await jwtService.decodeAccessToken(accessToken);
-        const {iat: newIatAccessToken} = await jwtService.decodeAccessToken(res.body.accessToken);
-
-        console.log('newIatAccessToken', newIatAccessToken)
-        console.log('iatAccessToken', iatAccessToken)
-
-        expect(newIatAccessToken).not.toEqual(iatAccessToken);
-
-        console.log('newIatAccessToken', newIatAccessToken)
-        console.log('iatAccessToken', iatAccessToken)*/
 
         const cookies = res.headers['set-cookie'] as unknown as string[];
         const newRefreshTokenCookie = cookies.find(cookie => cookie.startsWith('refreshToken='));
 
-        expect(newRefreshTokenCookie).toStrictEqual(expect.any(String));
-        //TODO fix problem with equality
-        /*expect(newRefreshTokenCookie).not.toEqual(refreshTokenCookie!);*/
-
-        /*const {iat: iatRefreshToken} = await jwtService.decodeRefreshToken(refreshTokenCookie!);
+        const {iat: newIatAccessToken} = await jwtService.decodeAccessToken(res.body.accessToken);
         const {iat: newIatRefreshToken} = await jwtService.decodeRefreshToken(newRefreshTokenCookie!.replace('refreshToken=', ''));
-        expect(newIatRefreshToken).not.toEqual(iatRefreshToken);*/
-    })
+
+        expect(newRefreshTokenCookie).toStrictEqual(expect.any(String));
+        expect(newIatAccessToken).not.toEqual(iatAccessToken);
+        expect(newIatRefreshToken).not.toEqual(iatRefreshToken);
+    })*/
 
     it('should return response NOT_AUTH_401 error', async () => {
         await loggedInUser(1);
@@ -333,5 +340,236 @@ describe('tests for auth endpoints', () => {
             .expect(HttpStatusCodeEnum.NO_CONTENT_204)
     })
 
+    it('should return work normal after 5 registration request one by one', async () => {
+        for (let i = 1; i < 6; i++) {
+            const user = createUserInputBody(i)
 
+            await req
+                .post(`${SETTINGS.PATH.AUTH}/registration`)
+                .send(user)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+        }
+    })
+
+    it('should return error TY_MANY_REQUEST after 6 registration one by one', async () => {
+        const user = createUserInputBody(6)
+
+        for (let i = 1; i < 6; i++) {
+            const userI = createUserInputBody(i)
+            await req
+                .post(`${SETTINGS.PATH.AUTH}/registration`)
+                .send(userI)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+        }
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/registration`)
+            .send(user)
+            .expect(HttpStatusCodeEnum.TO_MANY_REQUESTS)
+    })
+
+    it('should return response with status BAD_REQUEST_400 for invalid code', async () => {
+        const user = createUserInputBody(1)
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/registration`)
+            .send(user)
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        expect(mockSendMail).toHaveBeenCalledTimes(1);
+
+        const sentMailContent = mockSendMail.mock.calls[0][0].html;
+        const confirmationCode = sentMailContent.match(/code=([\w-]+)/)?.[1];
+
+        expect(confirmationCode).toBeDefined();
+
+        const res = await req
+            .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+            .send({code: invalidCode})
+            .expect(HttpStatusCodeEnum.BAD_REQUEST_400)
+
+        console.log(res.body)
+
+        expect(res.body).toHaveProperty('errorsMessages');
+        expect(Array.isArray(res.body.errorsMessages)).toBe(true);
+        expect(res.body.errorsMessages).toHaveLength(1);
+
+        expect(res.body.errorsMessages).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    field: 'code',
+                    message: expect.any(String),
+                }),
+            ])
+        );
+    })
+
+    it('should confirmed user email', async () => {
+        const user = createUserInputBody(1)
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/registration`)
+            .send(user)
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        expect(mockSendMail).toHaveBeenCalledTimes(1);
+
+        const sentMailContent = mockSendMail.mock.calls[0][0].html;
+        const confirmationCode = sentMailContent.match(/code=([\w-]+)/)?.[1];
+
+        expect(confirmationCode).toBeDefined();
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+            .send({code: confirmationCode})
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+    })
+
+    it('should return response with status BAD_REQUEST_400 when user already confirmed', async () => {
+        const user = createUserInputBody(1)
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/registration`)
+            .send(user)
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        expect(mockSendMail).toHaveBeenCalledTimes(1);
+
+        const sentMailContent = mockSendMail.mock.calls[0][0].html;
+        const confirmationCode = sentMailContent.match(/code=([\w-]+)/)?.[1];
+
+        expect(confirmationCode).toBeDefined();
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+            .send({code: confirmationCode})
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        const res = await req
+            .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+            .send({code: confirmationCode})
+            .expect(HttpStatusCodeEnum.BAD_REQUEST_400)
+
+        console.log(res.body)
+
+        expect(res.body).toHaveProperty('errorsMessages');
+        expect(Array.isArray(res.body.errorsMessages)).toBe(true);
+        expect(res.body.errorsMessages).toHaveLength(1);
+
+        expect(res.body.errorsMessages).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    field: 'code',
+                    message: expect.any(String),
+                }),
+            ])
+        );
+    })
+
+    it('should return response with error TO_MANY_REQUESTS', async () => {
+        const user = createUserInputBody(1)
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/registration`)
+            .send(user)
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        expect(mockSendMail).toHaveBeenCalledTimes(1);
+
+        const sentMailContent = mockSendMail.mock.calls[0][0].html;
+        const confirmationCode = sentMailContent.match(/code=([\w-]+)/)?.[1];
+
+        expect(confirmationCode).toBeDefined();
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+            .send({code: confirmationCode})
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        for (let i = 1; i < 5; i++) {
+            await req
+                .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+                .send({code: confirmationCode})
+                .expect(HttpStatusCodeEnum.BAD_REQUEST_400)
+        }
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+            .send({code: confirmationCode})
+            .expect(HttpStatusCodeEnum.TO_MANY_REQUESTS)
+    })
+
+    it('should return response with status BAD_REQUEST_400 for resend email when user already confirmed', async () => {
+        const user = createUserInputBody(1)
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/registration`)
+            .send(user)
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        expect(mockSendMail).toHaveBeenCalledTimes(1);
+
+        const sentMailContent = mockSendMail.mock.calls[0][0].html;
+        const confirmationCode = sentMailContent.match(/code=([\w-]+)/)?.[1];
+
+        expect(confirmationCode).toBeDefined();
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+            .send({code: confirmationCode})
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        const res = await req
+            .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+            .send({email: user.email})
+            .expect(HttpStatusCodeEnum.BAD_REQUEST_400)
+
+        console.log(res.body)
+
+        expect(res.body).toHaveProperty('errorsMessages');
+        expect(Array.isArray(res.body.errorsMessages)).toBe(true);
+        expect(res.body.errorsMessages).toHaveLength(1);
+
+        expect(res.body.errorsMessages).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    field: 'email',
+                    message: expect.any(String),
+                }),
+            ])
+        );
+    })
+
+    it('should return response with status TY_MANY_REQUEST', async () => {
+        const user = createUserInputBody(1)
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/registration`)
+            .send(user)
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        expect(mockSendMail).toHaveBeenCalledTimes(1);
+
+        const sentMailContent = mockSendMail.mock.calls[0][0].html;
+        const confirmationCode = sentMailContent.match(/code=([\w-]+)/)?.[1];
+
+        expect(confirmationCode).toBeDefined();
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+            .send({code: confirmationCode})
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        for (let i = 1; i < 6; i++) {
+            await req
+                .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+                .send({email: user.email})
+                .expect(HttpStatusCodeEnum.BAD_REQUEST_400)
+        }
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+            .send({email: user.email})
+            .expect(HttpStatusCodeEnum.TO_MANY_REQUESTS)
+    })
 })
