@@ -1,10 +1,10 @@
-import {commentsCollection} from "../../db";
 import {ObjectId} from "mongodb";
 import {TComment} from "../../types";
+import {CommentModel} from "../../db/models";
 
 export const queryCommentsRepository = {
     async getCommentById(id: string): Promise<TComment | null> {
-        const comment = await commentsCollection.findOne({_id: new ObjectId(id)});
+        const comment = await CommentModel.findOne({_id: new ObjectId(id)});
 
         if (comment) {
             return {

@@ -1,5 +1,3 @@
-import {MongoMemoryServer} from "mongodb-memory-server";
-import {MongoClient} from "mongodb";
 import {
     createdUser,
     createUserInputBody,
@@ -7,7 +5,7 @@ import {
     invalidCode,
     invalidRefreshToken,
     loggedInUser,
-    req
+    req, testDbName
 } from "./helpers";
 import {SETTINGS} from "../src/settings";
 import {HttpStatusCodeEnum} from "../src/constants";
@@ -18,18 +16,14 @@ dotenv.config()
 
 jest.mock('nodemailer');
 import {mockSendMail} from '../__mocks__';
-
-let mongoServer: MongoMemoryServer;
-let client: MongoClient;
+import mongoose from "mongoose";
 
 //TODO registration-confirmation and registration-email-resending test for expired confirmation code
 describe('tests for auth endpoints', () => {
-    beforeAll(async () => {
-        mongoServer = await MongoMemoryServer.create();
-        const uri = mongoServer.getUri();
+    const mongoURI = process.env.MONGO_URL || SETTINGS.MONGO_URL
 
-        client = new MongoClient(uri);
-        await client.connect();
+    beforeAll(async () => {
+        await mongoose.connect(`${mongoURI}/${testDbName}`)
 
         await req.delete(SETTINGS.PATH.TESTING).expect(HttpStatusCodeEnum.NO_CONTENT_204)
     })
@@ -40,8 +34,7 @@ describe('tests for auth endpoints', () => {
     })
 
     afterAll(async () => {
-        await client.close();
-        await mongoServer.stop();
+        await mongoose.connection.close()
     });
 
 

@@ -1,4 +1,3 @@
-import {commentsCollection, postsCollection} from "../../db";
 import {ObjectId} from "mongodb";
 import {
     TCommentsQuery,
@@ -7,17 +6,18 @@ import {
     TComment,
     TPost
 } from "../../types";
+import {CommentModel, PostModel} from "../../db/models";
 
 export const queryPostsRepository = {
     async getPosts(queryData: TPostsQuery): Promise<TResponseWithPagination<TPost[]>> {
-        const posts = await postsCollection
+        const posts = await PostModel
             .find({})
             .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? 1 : -1})
             .skip((+queryData.pageNumber - 1) * +queryData.pageSize)
             .limit(+queryData.pageSize)
-            .toArray();
+            .lean();
 
-        const totalCount = await postsCollection.countDocuments({});
+        const totalCount = await PostModel.countDocuments({});
 
         return {
             pagesCount: Math.ceil(totalCount / +queryData.pageSize),
@@ -36,7 +36,7 @@ export const queryPostsRepository = {
         }
     },
     async getPostById(id: string): Promise<TPost | null> {
-        const post = await postsCollection.findOne({_id: new ObjectId(id)});
+        const post = await PostModel.findOne({_id: new ObjectId(id)});
 
         if (post) {
             return {
@@ -53,14 +53,14 @@ export const queryPostsRepository = {
         return null
     },
     async getCommentsForPostById(id: string, queryData: TCommentsQuery): Promise<TResponseWithPagination<TComment[]>> {
-        const comments = await commentsCollection
+        const comments = await CommentModel
             .find({postId: id})
             .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? 1 : -1})
             .skip((+queryData.pageNumber - 1) * +queryData.pageSize)
             .limit(+queryData.pageSize)
-            .toArray();
+            .lean();
 
-        const totalCount = await commentsCollection.countDocuments({postId: id});
+        const totalCount = await CommentModel.countDocuments({postId: id});
 
         return {
             pagesCount: Math.ceil(totalCount / +queryData.pageSize),

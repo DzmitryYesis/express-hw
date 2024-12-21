@@ -1,17 +1,17 @@
-import {blogsCollection, postsCollection} from "../../db";
 import {ObjectId} from "mongodb";
 import {TResponseWithPagination, TBlog, TBlogsQuery, TPostsQuery, TPost} from "../../types";
+import {BlogModel, PostModel} from "../../db/models";
 
 export const queryBlogsRepository = {
     async getBlogs(queryData: TBlogsQuery): Promise<TResponseWithPagination<TBlog[]>> {
-        const blogs = await blogsCollection
+        const blogs = await BlogModel
             .find(queryData.searchNameTerm ? {name: {$regex: queryData.searchNameTerm, $options: 'i'}} : {})
             .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? 1 : -1})
             .skip((+queryData.pageNumber - 1) * +queryData.pageSize)
             .limit(+queryData.pageSize)
-            .toArray();
+            .lean();
 
-        const totalCount = await blogsCollection.countDocuments(queryData.searchNameTerm ? {
+        const totalCount = await BlogModel.countDocuments(queryData.searchNameTerm ? {
             name: {
                 $regex: queryData.searchNameTerm,
                 $options: 'i'
@@ -34,7 +34,7 @@ export const queryBlogsRepository = {
         }
     },
     async getBlogById(id: string): Promise<TBlog | null> {
-        const blog = await blogsCollection.findOne({_id: new ObjectId(id)});
+        const blog = await BlogModel.findOne({_id: new ObjectId(id)});
 
         if (blog) {
             return {
@@ -50,14 +50,14 @@ export const queryBlogsRepository = {
         return null
     },
     async getPostForBlogById(id: string, queryData: TPostsQuery): Promise<TResponseWithPagination<TPost[]>> {
-        const posts = await postsCollection
+        const posts = await PostModel
             .find({blogId: id})
             .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? 1 : -1})
             .skip((+queryData.pageNumber - 1) * +queryData.pageSize)
             .limit(+queryData.pageSize)
-            .toArray();
+            .lean();
 
-        const totalCount = await postsCollection.countDocuments({blogId: id});
+        const totalCount = await PostModel.countDocuments({blogId: id});
 
         return {
             pagesCount: Math.ceil(totalCount / +queryData.pageSize),
