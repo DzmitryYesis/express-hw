@@ -9,7 +9,7 @@ import {
 } from "./helpers";
 import {SETTINGS} from "../src/settings";
 import {HttpStatusCodeEnum} from "../src/constants";
-import {TErrorMessage, TLoginUser, TPersonalData} from "../src/types";
+import {TErrorMessage, TInputNewPassword, TLoginUser, TPersonalData} from "../src/types";
 import dotenv from "dotenv";
 
 dotenv.config()
@@ -19,6 +19,7 @@ import {mockSendMail} from '../__mocks__';
 import mongoose from "mongoose";
 
 //TODO registration-confirmation and registration-email-resending test for expired confirmation code
+//TODO new-password test for expired recoveryCode
 describe('tests for auth endpoints', () => {
     const mongoURI = process.env.MONGO_URL || SETTINGS.MONGO_URL
 
@@ -564,5 +565,225 @@ describe('tests for auth endpoints', () => {
             .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
             .send({email: user.email})
             .expect(HttpStatusCodeEnum.TO_MANY_REQUESTS)
+    })
+
+    it('should return response with status BAD_REQUEST_400 for invalid email', async () => {
+        await createdUser(1)
+
+        const res = await req
+            .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+            .send({email: ''})
+            .expect(HttpStatusCodeEnum.BAD_REQUEST_400)
+
+        console.log(res.body)
+
+        expect(res.body).toHaveProperty('errorsMessages');
+        expect(Array.isArray(res.body.errorsMessages)).toBe(true);
+        expect(res.body.errorsMessages).toHaveLength(1);
+
+        expect(res.body.errorsMessages).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    field: 'email',
+                    message: expect.any(String),
+                }),
+            ])
+        );
+    })
+
+    it('should return response NO_CONTENT and send recoveryCode to email', async () => {
+        const {user} = await createdUser(1)
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+            .send({email: user.email})
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        expect(mockSendMail).toHaveBeenCalledTimes(1);
+
+        const sentMailContent = mockSendMail.mock.calls[0][0].html;
+        const recoveryPasswordCode = sentMailContent.match(/recoveryCode=([\w-]+)/)?.[1];
+
+        expect(recoveryPasswordCode).toBeDefined();
+    })
+
+    it('should return response NO_CONTENT and send recoveryCode for non registered user', async () => {
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+            .send({email: 'testemail@gmail.com'})
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        expect(mockSendMail).toHaveBeenCalledTimes(1);
+
+        const sentMailContent = mockSendMail.mock.calls[0][0].html;
+        const recoveryPasswordCode = sentMailContent.match(/recoveryCode=([\w-]+)/)?.[1];
+
+        expect(recoveryPasswordCode).toBeDefined();
+    })
+
+    it('should return response TY_MANY_REQUEST for password-recovery', async () => {
+        for (let i = 1; i < 6; i++) {
+            await req
+                .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+                .send({email: 'testemail@gmail.com'})
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+        }
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+            .send({email: 'testemail@gmail.com'})
+            .expect(HttpStatusCodeEnum.TO_MANY_REQUESTS)
+    })
+
+    it('should return response with status BAD_REQUEST_400 for invalid new password', async () => {
+        const {user} = await createdUser(1)
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+            .send({email: user.email})
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        expect(mockSendMail).toHaveBeenCalledTimes(1);
+
+        const sentMailContent = mockSendMail.mock.calls[0][0].html;
+        const recoveryPasswordCode = sentMailContent.match(/recoveryCode=([\w-]+)/)?.[1];
+
+        expect(recoveryPasswordCode).toBeDefined();
+
+        const res = await req
+            .post(`${SETTINGS.PATH.AUTH}/new-password`)
+            .send({newPassword: '23', recoveryCode: recoveryPasswordCode} as TInputNewPassword)
+            .expect(HttpStatusCodeEnum.BAD_REQUEST_400)
+
+        console.log(res.body)
+
+        expect(res.body).toHaveProperty('errorsMessages');
+        expect(Array.isArray(res.body.errorsMessages)).toBe(true);
+        expect(res.body.errorsMessages).toHaveLength(1);
+
+        expect(res.body.errorsMessages).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    field: 'newPassword',
+                    message: expect.any(String),
+                }),
+            ])
+        );
+    })
+
+    it('should return response with status BAD_REQUEST_400 for invalid new password and recoveryCode', async () => {
+        const {user} = await createdUser(1)
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+            .send({email: user.email})
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        const res = await req
+            .post(`${SETTINGS.PATH.AUTH}/new-password`)
+            .send({newPassword: '23', recoveryCode: ''})
+            .expect(HttpStatusCodeEnum.BAD_REQUEST_400)
+
+        console.log(res.body)
+
+        expect(res.body).toHaveProperty('errorsMessages');
+        expect(Array.isArray(res.body.errorsMessages)).toBe(true);
+        expect(res.body.errorsMessages).toHaveLength(2);
+
+        expect(res.body.errorsMessages).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    field: 'newPassword',
+                    message: expect.any(String),
+                }),
+                expect.objectContaining({
+                    field: 'recoveryCode',
+                    message: 'Incorrect length',
+                }),
+            ])
+        );
+    })
+
+    it('should return response with status BAD_REQUEST_400 for recoveryCode when code not created', async () => {
+        const {user} = await createdUser(1)
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+            .send({email: user.email})
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        const res = await req
+            .post(`${SETTINGS.PATH.AUTH}/new-password`)
+            .send({newPassword: 'newPassword', recoveryCode: invalidCode})
+            .expect(HttpStatusCodeEnum.BAD_REQUEST_400)
+
+        console.log(res.body)
+
+        expect(res.body).toHaveProperty('errorsMessages');
+        expect(Array.isArray(res.body.errorsMessages)).toBe(true);
+        expect(res.body.errorsMessages).toHaveLength(1);
+
+        expect(res.body.errorsMessages).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    field: 'recoveryCode',
+                    message: 'some problem',
+                }),
+            ])
+        );
+    })
+
+    it('should return response with status TY_MANY_REQUEST for new-password', async () => {
+        const {user} = await createdUser(1)
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+            .send({email: user.email})
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        for (let i = 1; i < 6; i++) {
+            await req
+                .post(`${SETTINGS.PATH.AUTH}/new-password`)
+                .send({newPassword: 'newPassword', recoveryCode: invalidCode})
+                .expect(HttpStatusCodeEnum.BAD_REQUEST_400)
+        }
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/new-password`)
+            .send({newPassword: 'newPassword', recoveryCode: invalidCode})
+            .expect(HttpStatusCodeEnum.TO_MANY_REQUESTS)
+    })
+
+    it('should update password for user', async () => {
+        const {user, password} = await createdUser(1)
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+            .send({email: user.email})
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        expect(mockSendMail).toHaveBeenCalledTimes(1);
+
+        const sentMailContent = mockSendMail.mock.calls[0][0].html;
+        const recoveryPasswordCode = sentMailContent.match(/recoveryCode=([\w-]+)/)?.[1];
+
+        expect(recoveryPasswordCode).toBeDefined();
+
+        const newPassword = 'newPassword';
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/new-password`)
+            .send({newPassword: newPassword, recoveryCode: recoveryPasswordCode})
+            .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/login`)
+            .send({loginOrEmail: user.login, password})
+            .expect(HttpStatusCodeEnum.NOT_AUTH_401)
+
+        await req
+            .post(`${SETTINGS.PATH.AUTH}/login`)
+            .send({loginOrEmail: user.login, password: newPassword})
+            .expect(HttpStatusCodeEnum.OK_200)
     })
 })

@@ -16,6 +16,8 @@ export const authPasswordRecoveryCodeValidator = body('recoveryCode')
     .trim()
     .isString()
     .withMessage('Must be a string')
+    .isLength({min: 36, max: 36})
+    .withMessage('Incorrect length')
 
 export const authLoginValidator = body('login')
     .trim()
