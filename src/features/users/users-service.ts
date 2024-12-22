@@ -1,12 +1,20 @@
-import {TErrorMessage, TInputUser, TLoginUser, TOutPutErrorsType, TResultServiceObj} from "../../types";
+import {
+    TErrorMessage,
+    TInputNewPassword,
+    TInputUser,
+    TLoginUser,
+    TOutPutErrorsType,
+    TResultServiceObj
+} from "../../types";
 import bcrypt from "bcrypt";
-import {TSessionsDB, TUserDB} from "../../db";
+import {TPasswordRecoveryDB, TSessionsDB, TUserDB} from "../../db";
 import {usersRepository} from "./users-repository";
 import {createServiceResultObj, jwtService, sendEmailService} from "../../utils";
 import {v4 as uuidV4} from "uuid";
 import {add} from "date-fns";
 import {sessionsRepository} from "./sessions-repository";
 import {SETTINGS} from "../../settings";
+import {passwordRecoveryRepository} from "./password-recovery-repository";
 
 export const usersService = {
     async createUser(data: TInputUser, isAdmin = false): Promise<TResultServiceObj<TOutPutErrorsType | string>> {
@@ -93,7 +101,60 @@ export const usersService = {
             return createServiceResultObj("SUCCESS", "OK")
         }
     },
-    async resendEmail(email: string) {
+    async newPasswordConfirmation(data: TInputNewPassword): Promise<TResultServiceObj<TOutPutErrorsType>> {
+        const {result, data: passwordRecoveryData} = await this.findPasswordRecoveryCode(data.recoveryCode);
+
+        if (result === 'REJECT' || passwordRecoveryData!.expirationDate < new Date()) {
+            const badRequestResponse: TOutPutErrorsType = {
+                errorsMessages: [{field: 'recoveryCode', message: 'some problem'}],
+            }
+
+            return createServiceResultObj<TOutPutErrorsType>("REJECT", "BAD_REQUEST", badRequestResponse);
+        } else {
+            const user = await usersRepository.findUserById(passwordRecoveryData!.userId.toString());
+
+            const passwordHash = await this.createHash(data.newPassword, user!.accountData.salt)
+
+            await usersRepository.updateUserPassword(user!._id, passwordHash);
+
+            await passwordRecoveryRepository.deletePasswordRecoveryObj(passwordRecoveryData!._id);
+
+            return createServiceResultObj("SUCCESS", "NO_CONTENT")
+        }
+    },
+    async passwordRecovery(email: string): Promise<TResultServiceObj> {
+        const {result, data} = await this.findUserByEmail(email);
+
+        if (result === 'SUCCESS' && data) {
+            const passwordRecoveryObj: Omit<TPasswordRecoveryDB, '_id'> = {
+                userId: data._id,
+                recoveryCode: uuidV4(),
+                expirationDate: add(new Date(), {
+                    hours: 1,
+                    minutes: 3,
+                })
+            }
+
+            await passwordRecoveryRepository.createPasswordRecovery(passwordRecoveryObj);
+
+            const emailHtml = `<h1>To finish password recovery please follow the link below:</h1> <p><a href="https://some-url.com/password-recovery?recoveryCode=${passwordRecoveryObj.recoveryCode}"></a>Click to confirm your email</p>`
+
+            sendEmailService.sendEmail(data.accountData.email, 'Confirm your Email', emailHtml)
+                .catch(e => console.log('СARAMBA!!!: ', e));
+
+            return createServiceResultObj('SUCCESS', 'NO_CONTENT');
+        }
+
+        const invalidRecoveryCode = uuidV4();
+
+        const emailHtml = `<h1>To finish password recovery please follow the link below:</h1> <p><a href="https://some-url.com/password-recovery?recoveryCode=${invalidRecoveryCode}"></a>Click to confirm your email</p>`
+
+        sendEmailService.sendEmail(email, 'Confirm your Email', emailHtml)
+            .catch(e => console.log('СARAMBA!!!: ', e));
+
+        return createServiceResultObj('SUCCESS', 'NO_CONTENT');
+    },
+    async resendEmail(email: string): Promise<TResultServiceObj<TOutPutErrorsType>> {
         const {result, data} = await this.findUserByEmail(email);
         if (result === "REJECT" ||
             data!.emailConfirmation.isConfirmed ||
@@ -218,6 +279,15 @@ export const usersService = {
         if (user) {
             return createServiceResultObj<TUserDB>("SUCCESS", "OK", user);
         }
+        return createServiceResultObj("REJECT", "NOT_FOUND");
+    },
+    async findPasswordRecoveryCode(code: string): Promise<TResultServiceObj<TPasswordRecoveryDB>> {
+        const passwordRecoveryObj = await passwordRecoveryRepository.findPasswordRecoveryCode(code);
+
+        if (passwordRecoveryObj) {
+            return createServiceResultObj<TPasswordRecoveryDB>('SUCCESS', 'OK', passwordRecoveryObj);
+        }
+
         return createServiceResultObj("REJECT", "NOT_FOUND");
     },
     async createHash(data: string, salt: string): Promise<string> {

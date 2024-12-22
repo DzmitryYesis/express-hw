@@ -1,19 +1,21 @@
 import {
-    blogsCollection,
-    commentsCollection,
-    logRequestsCollection,
-    postsCollection,
-    sessionsCollection,
-    usersCollection
-} from '../../db';
+    BlogModel,
+    CommentModel,
+    LogRequestModel,
+    PasswordRecoveryModel,
+    PostModel,
+    SessionModel,
+    UserModel
+} from "../../db/models";
 
 export const testingRepository = {
     async deleteAllData() {
-        await blogsCollection.deleteMany({});
-        await postsCollection.deleteMany({});
-        await usersCollection.deleteMany({});
-        await commentsCollection.deleteMany({});
-        await sessionsCollection.deleteMany({});
-        await logRequestsCollection.deleteMany({});
+        await BlogModel.deleteMany({});
+        await PostModel.deleteMany({});
+        await UserModel.deleteMany({});
+        await CommentModel.deleteMany({});
+        await SessionModel.deleteMany({});
+        await LogRequestModel.deleteMany({});
+        await PasswordRecoveryModel.deleteMany({});
     }
 }

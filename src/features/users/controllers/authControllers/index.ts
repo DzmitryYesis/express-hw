@@ -5,3 +5,5 @@ export * from './RegistrationConfirmationCodeController';
 export * from './RegistrationEmailResendingController';
 export * from './UpdateTokensController';
 export * from './LogoutController';
+export * from './PasswordRecoveryController';
+export * from './NewPasswordController';

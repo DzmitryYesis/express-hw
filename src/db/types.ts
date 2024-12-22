@@ -1,7 +1,7 @@
 import {ObjectId} from "mongodb";
 
 export type TBlogDB = {
-    _id: ObjectId,
+    _id: ObjectId;
     name: string,
     description: string,
     websiteUrl: string,
@@ -10,7 +10,7 @@ export type TBlogDB = {
 }
 
 export type TPostDB = {
-    _id: ObjectId,
+    _id: ObjectId;
     title: string,
     shortDescription: string,
     content: string,
@@ -20,7 +20,7 @@ export type TPostDB = {
 }
 
 export type TUserDB = {
-    _id: ObjectId,
+    _id: ObjectId;
     accountData: {
         login: string,
         email: string,
@@ -36,7 +36,7 @@ export type TUserDB = {
 }
 
 export type TCommentDB = {
-    _id: ObjectId,
+    _id: ObjectId;
     content: string,
     commentatorInfo: {
         userId: string,
@@ -47,7 +47,7 @@ export type TCommentDB = {
 }
 
 export type TSessionsDB = {
-    _id: ObjectId,
+    _id: ObjectId;
     userId: ObjectId,
     exp: number,
     iat: number,
@@ -57,8 +57,15 @@ export type TSessionsDB = {
 }
 
 export type TLogRequestsDB = {
-    _id: ObjectId,
+    _id: ObjectId;
     ip: string,
     url: string
     date: Date
+}
+
+export type TPasswordRecoveryDB = {
+    _id: ObjectId;
+    userId: ObjectId,
+    recoveryCode: string,
+    expirationDate: Date,
 }

@@ -1,34 +1,35 @@
-import {sessionsCollection, TSessionsDB} from "../../db";
+import {TSessionsDB} from "../../db";
 import {ObjectId} from "mongodb";
+import {SessionModel} from "../../db/models";
 
 export const sessionsRepository = {
     async addSession(data: Omit<TSessionsDB, '_id'>): Promise<string> {
-        const result = await sessionsCollection.insertOne({...data} as TSessionsDB);
+        const result = await SessionModel.create({...data} as TSessionsDB);
 
-        return result.insertedId.toString();
+        return result._id.toString();
     },
     async findSession(deviceId: string, iat: number): Promise<TSessionsDB | null> {
-        return await sessionsCollection.findOne({deviceId, iat})
+        return SessionModel.findOne({deviceId, iat});
     },
     async findSessionByDeviceId(deviceId: string): Promise<TSessionsDB | null> {
-        return await sessionsCollection.findOne({deviceId});
+        return SessionModel.findOne({deviceId});
     },
     async deleteSessionById(deviceId: string): Promise<boolean> {
-        const result = await sessionsCollection.deleteOne({deviceId})
+        const result = await SessionModel.deleteOne({deviceId})
 
         return result.deletedCount === 1
     },
     async deleteSessionByDeviceIdAndIat(deviceId: string, iat: number): Promise<number> {
-        const result = await sessionsCollection.deleteOne({deviceId, iat})
+        const result = await SessionModel.deleteOne({deviceId, iat})
         return result.deletedCount;
     },
     async deleteSessionsExcludeCurrent(deviceId: string, userId: string): Promise<boolean> {
-        const result = await sessionsCollection.deleteMany({userId: new ObjectId(userId), deviceId: {$ne: deviceId}});
+        const result = await SessionModel.deleteMany({userId: new ObjectId(userId), deviceId: {$ne: deviceId}});
 
         return result.deletedCount > 0;
     },
     async updateSessionData(data: TSessionsDB): Promise<boolean> {
-        const result = await sessionsCollection.updateOne({_id: data._id}, {$set: {...data}});
+        const result = await SessionModel.updateOne({_id: data._id}, {$set: {...data}});
 
         return result.matchedCount === 1
     }

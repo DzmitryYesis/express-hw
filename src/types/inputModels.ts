@@ -26,7 +26,16 @@ export type TInputCode = {
     code: string,
 }
 
+export type TInputNewPassword = {
+    newPassword: string,
+    recoveryCode: string,
+}
+
 export type TInputResendEmail = {
+    email: string,
+}
+
+export type TInputPasswordRecovery = {
     email: string,
 }
 

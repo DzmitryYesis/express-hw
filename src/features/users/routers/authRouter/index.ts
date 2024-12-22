@@ -4,6 +4,8 @@ import {
     authEmailValidator,
     authLoginOrEmailValidator,
     authLoginValidator,
+    authNewPasswordValidator,
+    authPasswordRecoveryCodeValidator,
     authPasswordValidator
 } from "../../middlewares";
 import {
@@ -19,7 +21,7 @@ import {
     RegistrationConfirmationCodeController,
     RegistrationEmailResendingController,
     UpdateTokensController,
-    LogoutController
+    LogoutController, PasswordRecoveryController, NewPasswordController
 } from "../../controllers";
 
 export const authRouter = Router();
@@ -40,12 +42,12 @@ authRouter.post('/login',
 authRouter.post('/refresh-token',
     authRefreshTokenMiddleware,
     UpdateTokensController
-    );
+);
 
 authRouter.post('/logout',
     authRefreshTokenMiddleware,
     LogoutController
-    )
+)
 
 authRouter.post('/registration',
     logRequestMiddleware,
@@ -69,3 +71,18 @@ authRouter.post('/registration-email-resending',
     inputCheckErrorsMiddleware,
     RegistrationEmailResendingController
 )
+
+authRouter.post('/password-recovery',
+    logRequestMiddleware,
+    authEmailValidator,
+    inputCheckErrorsMiddleware,
+    PasswordRecoveryController
+)
+
+authRouter.post('/new-password',
+    logRequestMiddleware,
+    authPasswordRecoveryCodeValidator,
+    authNewPasswordValidator,
+    inputCheckErrorsMiddleware,
+    NewPasswordController
+    )

@@ -1,10 +1,10 @@
-import {sessionsCollection} from "../../db";
 import {TDevice} from "../../types";
 import {ObjectId} from "mongodb";
+import {SessionModel} from "../../db/models";
 
 export const queryDevicesRepository = {
     async getUserDevices(userId: string): Promise<TDevice[]> {
-        const devices = await sessionsCollection.find({userId: new ObjectId(userId)}).toArray();
+        const devices = await SessionModel.find({userId: new ObjectId(userId)}).lean();
 
         return devices.map(d => ({
             ip: d.ip,

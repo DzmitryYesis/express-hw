@@ -1,13 +1,14 @@
-import {logRequestsCollection, TLogRequestsDB} from "../../db";
+import {TLogRequestsDB} from "../../db";
+import {LogRequestModel} from "../../db/models";
 
 export const logRequestsRepository = {
     async addLogRequest(data: Omit<TLogRequestsDB, '_id'>) {
-        const result = await logRequestsCollection.insertOne({...data} as TLogRequestsDB);
+        const result = await LogRequestModel.create({...data} as TLogRequestsDB);
 
-        return result.insertedId.toString();
+        return result._id.toString();
     },
     async countLogRequest(data: Omit<TLogRequestsDB, '_id'>) {
-        return await logRequestsCollection.countDocuments({
+        return LogRequestModel.countDocuments({
             ip: data.ip,
             url: data.url,
             date: {$gte: data.date},

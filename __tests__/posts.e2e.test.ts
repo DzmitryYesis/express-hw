@@ -1,5 +1,6 @@
 import {SETTINGS} from '../src/settings';
 import {
+    authBasic,
     createdBlog,
     createdCommentInputBody,
     createdCommentsForPostByPostId,
@@ -10,25 +11,20 @@ import {
     invalidBlogId,
     invalidPostId,
     loggedInUser,
-    req
+    req, testDbName
 } from './helpers';
 import {HttpStatusCodeEnum} from '../src/constants';
 import {TComment, TErrorMessage, TInputComment, TInputPost, TPost} from '../src/types';
-import {MongoMemoryServer} from 'mongodb-memory-server';
-import {MongoClient} from 'mongodb';
+import dotenv from "dotenv";
+import mongoose from "mongoose";
 
-const authBasic = Buffer.from(SETTINGS.AUTH_BASIC, 'utf8').toString('base64');
-
-let mongoServer: MongoMemoryServer;
-let client: MongoClient;
+dotenv.config()
 
 describe('test CRUD flow for posts', () => {
-        beforeAll(async () => {
-            mongoServer = await MongoMemoryServer.create();
-            const uri = mongoServer.getUri();
+    const mongoURI = process.env.MONGO_URL || SETTINGS.MONGO_URL
 
-            client = new MongoClient(uri);
-            await client.connect();
+        beforeAll(async () => {
+            await mongoose.connect(`${mongoURI}/${testDbName}`)
 
             await req.delete(SETTINGS.PATH.TESTING).expect(HttpStatusCodeEnum.NO_CONTENT_204)
         })
@@ -38,8 +34,7 @@ describe('test CRUD flow for posts', () => {
         })
 
         afterAll(async () => {
-            await client.close();
-            await mongoServer.stop();
+            await mongoose.connection.close()
         });
 
         it('should return response with default queries data and empty Array for items', async () => {

@@ -1,4 +1,3 @@
-import {usersCollection} from "../../db";
 import {
     TResponseWithPagination,
     TUser,
@@ -6,10 +5,11 @@ import {
     TPersonalData
 } from "../../types";
 import {ObjectId} from "mongodb";
+import {UserModel} from "../../db/models";
 
 export const queryUsersRepository = {
     async getUsers(queryData: TUsersQuery): Promise<TResponseWithPagination<TUser[]>> {
-        const users = await usersCollection
+        const users = await UserModel
             .find({
                 $or: [
                     queryData.searchLoginTerm ? {'accountData.login': {$regex: queryData.searchLoginTerm, $options: 'i'}} : {},
@@ -19,9 +19,9 @@ export const queryUsersRepository = {
             .sort({[`accountData.${queryData.sortBy}`]: queryData.sortDirection === 'asc' ? 1 : -1})
             .skip((+queryData.pageNumber - 1) * +queryData.pageSize)
             .limit(+queryData.pageSize)
-            .toArray();
+            .lean();
 
-        const totalCount = await usersCollection.countDocuments({
+        const totalCount = await UserModel.countDocuments({
             $or: [
                 queryData.searchLoginTerm ? {'accountData.login': {$regex: queryData.searchLoginTerm, $options: 'i'}} : {},
                 queryData.searchEmailTerm ? {'accountData.email': {$regex: queryData.searchEmailTerm, $options: 'i'}} : {}
@@ -42,7 +42,7 @@ export const queryUsersRepository = {
         }
     },
     async getUserById(id: string): Promise<TUser | null> {
-        const user = await usersCollection.findOne({_id: new ObjectId(id)});
+        const user = await UserModel.findOne({_id: new ObjectId(id)});
 
         if (user) {
             return {
@@ -56,7 +56,7 @@ export const queryUsersRepository = {
         return null;
     },
     async getUserPersonalData(id: string): Promise<TPersonalData | null> {
-        const user = await usersCollection.findOne({_id: new ObjectId(id)});
+        const user = await UserModel.findOne({_id: new ObjectId(id)});
 
         if (user) {
             return {
