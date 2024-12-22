@@ -1,4 +1,12 @@
-import {BlogModel, CommentModel, LogRequestModel, PostModel, SessionModel, UserModel} from "../../db/models";
+import {
+    BlogModel,
+    CommentModel,
+    LogRequestModel,
+    PasswordRecoveryModel,
+    PostModel,
+    SessionModel,
+    UserModel
+} from "../../db/models";
 
 export const testingRepository = {
     async deleteAllData() {
@@ -8,5 +16,6 @@ export const testingRepository = {
         await CommentModel.deleteMany({});
         await SessionModel.deleteMany({});
         await LogRequestModel.deleteMany({});
+        await PasswordRecoveryModel.deleteMany({});
     }
 }

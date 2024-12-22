@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import {TBlogDB, TCommentDB, TLogRequestsDB, TPostDB, TSessionsDB, TUserDB} from "./types";
+import {TBlogDB, TCommentDB, TLogRequestsDB, TPasswordRecoveryDB, TPostDB, TSessionsDB, TUserDB} from "./types";
 import {WithId} from "mongodb";
 
 export const BlogSchema = new mongoose.Schema<WithId<TBlogDB>>({
@@ -57,4 +57,10 @@ export const LogRequestSchema = new mongoose.Schema<WithId<TLogRequestsDB>>({
     ip: {type: String, required: true},
     url: {type: String, required: true},
     date: {type: Date, required: true},
+})
+
+export const PasswordRecoverySchema = new mongoose.Schema<WithId<TPasswordRecoveryDB>>({
+    userId: {type: 'ObjectId', required: true},
+    recoveryCode: {type: String, required: true},
+    expirationDate: {type: Date, required: true}
 })

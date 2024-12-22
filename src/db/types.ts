@@ -62,3 +62,10 @@ export type TLogRequestsDB = {
     url: string
     date: Date
 }
+
+export type TPasswordRecoveryDB = {
+    _id: ObjectId;
+    userId: ObjectId,
+    recoveryCode: string,
+    expirationDate: Date,
+}

@@ -18,6 +18,11 @@ export const usersRepository = {
 
         return result.modifiedCount === 1
     },
+    async updateUserPassword(id: ObjectId, passwordHash: string): Promise<boolean> {
+        const result = await UserModel.updateOne({_id: id}, {$set: {'accountData.passwordHash': passwordHash}});
+
+        return result.modifiedCount === 1
+    },
     async deleteUser(id: string): Promise<boolean> {
         const result = await UserModel.deleteOne({_id: new ObjectId(id)})
 
