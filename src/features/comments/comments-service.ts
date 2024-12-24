@@ -2,6 +2,7 @@ import {commentsRepository} from "../comments";
 import {TInputComment, TResultServiceObj} from "../../types";
 import {TCommentDB} from "../../db";
 import {createServiceResultObj} from "../../utils";
+import {LikeStatusEnum} from "../../constants";
 
 export const commentsService = {
     async findCommentById(id: string): Promise<TResultServiceObj<TCommentDB>> {
@@ -26,6 +27,51 @@ export const commentsService = {
         }
 
         return createServiceResultObj(result, status);
+    },
+    async likeComment(commentId: string, likeStatus: string, userId: string): Promise<TResultServiceObj> {
+        const {result, data} = await this.findCommentById(commentId);
+
+        if (result === "SUCCESS" && data) {
+            const {_id, likesInfo: {likes, dislikes}} = data
+
+            if (likeStatus === LikeStatusEnum.LIKE) {
+                if (!likes.includes(userId) && !dislikes.includes(userId)) {
+                    await commentsRepository.addValueToLikesInfo(_id, 'likes', userId);
+                }
+                if (!likes.includes(userId) && dislikes.includes(userId)) {
+                    await commentsRepository.deleteValueFromLikesInfo(_id, 'dislikes', userId);
+                    await commentsRepository.addValueToLikesInfo(_id, 'likes', userId);
+                }
+
+                return createServiceResultObj("SUCCESS", "NO_CONTENT");
+            }
+
+            if (likeStatus === LikeStatusEnum.DISLIKE) {
+                if (!likes.includes(userId) && !dislikes.includes(userId)) {
+                    await commentsRepository.addValueToLikesInfo(_id, 'dislikes', userId);
+                }
+                if (likes.includes(userId) && !dislikes.includes(userId)) {
+                    await commentsRepository.deleteValueFromLikesInfo(_id, 'likes', userId);
+                    await commentsRepository.addValueToLikesInfo(_id, 'dislikes', userId);
+                }
+
+                return createServiceResultObj("SUCCESS", "NO_CONTENT");
+            }
+
+            if (likeStatus === LikeStatusEnum.NONE) {
+                if (likes.includes(userId)) {
+                    await commentsRepository.deleteValueFromLikesInfo(_id, 'likes', userId);
+                }
+
+                if (dislikes.includes(userId)) {
+                    await commentsRepository.deleteValueFromLikesInfo(_id, 'dislikes', userId);
+                }
+
+                return createServiceResultObj("SUCCESS", "NO_CONTENT");
+            }
+        }
+
+        return createServiceResultObj("REJECT", "NOT_FOUND")
     },
     async deleteCommentById(userId: string, id: string): Promise<TResultServiceObj> {
         const {result, status, data} = await this.findCommentById(id);

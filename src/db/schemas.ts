@@ -42,10 +42,14 @@ export const CommentSchema = new mongoose.Schema<WithId<TCommentDB>>({
     },
     postId: {type: String, required: true},
     createdAt: {type: String, required: true},
+    likesInfo: {
+        likes: {type: [String], required: true},
+        dislikes: {type: [String], required: true},
+    }
 })
 
 export const SessionSchema = new mongoose.Schema<WithId<TSessionsDB>>({
-    userId: {type: "ObjectId", required: true},
+    userId: {type: mongoose.Schema.Types.ObjectId, required: true},
     exp: {type: Number, required: true},
     iat: {type: Number, required: true},
     deviceId: {type: String, required: true},
@@ -60,7 +64,7 @@ export const LogRequestSchema = new mongoose.Schema<WithId<TLogRequestsDB>>({
 })
 
 export const PasswordRecoverySchema = new mongoose.Schema<WithId<TPasswordRecoveryDB>>({
-    userId: {type: 'ObjectId', required: true},
+    userId: {type: mongoose.Schema.Types.ObjectId, required: true},
     recoveryCode: {type: String, required: true},
     expirationDate: {type: Date, required: true}
 })

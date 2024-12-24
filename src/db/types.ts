@@ -35,6 +35,11 @@ export type TUserDB = {
     }
 }
 
+export type TLikesInfoDB = {
+    likes: string[],
+    dislikes: string[],
+}
+
 export type TCommentDB = {
     _id: ObjectId;
     content: string,
@@ -44,6 +49,7 @@ export type TCommentDB = {
     },
     postId: string,
     createdAt: string,
+    likesInfo: TLikesInfoDB
 }
 
 export type TSessionsDB = {

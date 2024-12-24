@@ -11,7 +11,7 @@ export const GetCommentsForPostByIdController = async (req: RequestWithParamAndQ
     const {result} = await postsService.findPostById(req.params.id);
 
     if (result === "SUCCESS") {
-        const comments = await queryPostsRepository.getCommentsForPostById(req.params.id, formatQueryCommentsData(req.query) as TCommentsQuery);
+        const comments = await queryPostsRepository.getCommentsForPostById(req.params.id, formatQueryCommentsData(req.query) as TCommentsQuery, req.userId);
 
         res.status(HttpStatusCodeEnum.OK_200).json(comments)
     } else {

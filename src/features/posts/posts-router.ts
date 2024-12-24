@@ -11,6 +11,7 @@ import {
 import {
     authBasicMiddleware,
     authBearerMiddleware,
+    checkAccessTokenMiddleware,
     inputCheckErrorsMiddleware,
     queryFieldsMiddleware
 } from '../../global-middlewares';
@@ -41,6 +42,7 @@ postsRouter.post('/',
     CreatePostController)
 postsRouter.get('/:id', GetPostByIdController);
 postsRouter.get('/:id/comments',
+    checkAccessTokenMiddleware,
     postIdValidator,
     ...comments,
     queryFieldsMiddleware,

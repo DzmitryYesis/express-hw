@@ -7,6 +7,8 @@ import {
     TPost
 } from "../../types";
 import {CommentModel, PostModel} from "../../db/models";
+import {TCommentDB} from "../../db";
+import {getUserLikeStatus} from "../../utils";
 
 export const queryPostsRepository = {
     async getPosts(queryData: TPostsQuery): Promise<TResponseWithPagination<TPost[]>> {
@@ -52,7 +54,7 @@ export const queryPostsRepository = {
 
         return null
     },
-    async getCommentsForPostById(id: string, queryData: TCommentsQuery): Promise<TResponseWithPagination<TComment[]>> {
+    async getCommentsForPostById(id: string, queryData: TCommentsQuery, userId: string | null): Promise<TResponseWithPagination<TComment[]>> {
         const comments = await CommentModel
             .find({postId: id})
             .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? 1 : -1})
@@ -67,12 +69,23 @@ export const queryPostsRepository = {
             page: +queryData.pageNumber,
             pageSize: +queryData.pageSize,
             totalCount,
-            items: comments.map(c => ({
-                id: c._id.toString(),
-                content: c.content,
-                commentatorInfo: c.commentatorInfo,
-                createdAt: c.createdAt
-            }))
+            items: comments.map((c: TCommentDB) => {
+                const userLikeStatus = getUserLikeStatus(userId, c.likesInfo);
+
+                console.log('Final: ', userLikeStatus)
+
+                return {
+                    id: c._id.toString(),
+                    content: c.content,
+                    commentatorInfo: c.commentatorInfo,
+                    createdAt: c.createdAt,
+                    likesInfo: {
+                        likesCount: c.likesInfo.likes.length,
+                        dislikesCount: c.likesInfo.dislikes.length,
+                        myStatus: userLikeStatus
+                    }
+                }
+            })
         }
     },
 }

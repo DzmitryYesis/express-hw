@@ -42,3 +42,7 @@ export type TInputPasswordRecovery = {
 export type TInputComment = {
     content: string,
 }
+
+export type TInputLikeComment = {
+    likeStatus: string
+}

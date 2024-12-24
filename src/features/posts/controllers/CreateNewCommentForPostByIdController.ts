@@ -10,7 +10,7 @@ export const CreateNewCommentForPostByIdController = async (req: RequestWithPara
     const {result, data} = await postsService.createCommentForPost(req.params.id, req.body, req.userId!)
 
     if (result === "SUCCESS" && data) {
-        const newComment = await queryCommentsRepository.getCommentById(data);
+        const newComment = await queryCommentsRepository.getCommentById(data, req.userId);
 
         res.status(HttpStatusCodeEnum.CREATED_201).json(newComment!);
     } else {

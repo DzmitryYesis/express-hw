@@ -11,9 +11,10 @@ import {
     invalidBlogId,
     invalidPostId,
     loggedInUser,
-    req, testDbName
+    req,
+    testDbName
 } from './helpers';
-import {HttpStatusCodeEnum} from '../src/constants';
+import {HttpStatusCodeEnum, LikeStatusEnum} from '../src/constants';
 import {TComment, TErrorMessage, TInputComment, TInputPost, TPost} from '../src/types';
 import dotenv from "dotenv";
 import mongoose from "mongoose";
@@ -583,6 +584,11 @@ describe('test CRUD flow for posts', () => {
                 commentatorInfo: {
                     userId: user.id,
                     userLogin: user.login
+                },
+                likesInfo: {
+                    likesCount: 0,
+                    dislikesCount: 0,
+                    myStatus: LikeStatusEnum.NONE
                 }
             } as TComment);
         })

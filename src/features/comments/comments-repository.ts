@@ -17,6 +17,16 @@ export const commentsRepository = {
 
         return result.matchedCount === 1
     },
+    async addValueToLikesInfo(commentId: ObjectId, field: 'likes' | 'dislikes', userId: string): Promise<boolean> {
+        const result = await CommentModel.updateOne({_id: commentId}, {$addToSet: {[`likesInfo.${field}`]: userId}});
+
+        return result.matchedCount === 1
+    },
+    async deleteValueFromLikesInfo(commentId: ObjectId, field: 'likes' | 'dislikes', userId: string): Promise<boolean> {
+        const result = await CommentModel.updateOne({_id: commentId}, {$pull: {[`likesInfo.${field}`]: userId}});
+
+        return result.matchedCount === 1
+    },
     async deleteCommentById(id: string): Promise<boolean> {
         const result = await CommentModel.deleteOne({_id: new ObjectId(id)})
 

@@ -4,7 +4,7 @@ import {HttpStatusCodeEnum} from "../../../constants";
 import {queryCommentsRepository} from "../query-comments-repository";
 
 export const GetCommentsByIdController = async (req: RequestWithParam<{ id: string }>, res: Response<TComment>) => {
-    const comment = await queryCommentsRepository.getCommentById(req.params.id)
+    const comment = await queryCommentsRepository.getCommentById(req.params.id, req.userId)
     if (comment) {
         res
             .status(HttpStatusCodeEnum.OK_200)

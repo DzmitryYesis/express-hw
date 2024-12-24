@@ -45,7 +45,11 @@ export const postsService = {
                 },
                 createdAt: new Date().toISOString(),
                 postId: id,
-                ...data
+                ...data,
+                likesInfo: {
+                    likes: [],
+                    dislikes: [],
+                }
             }
 
             const insertedId = await commentsRepository.createComment(newComment);
