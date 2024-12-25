@@ -51,7 +51,7 @@ export class BlogsController {
         const {result} = await this.blogsService.findBlogById(req.params.id);
 
         if (result === "SUCCESS") {
-            const posts = await this.queryBlogsRepository.getPostForBlogById(req.params.id, formatQueryPostsData(req.query) as TPostsQuery);
+            const posts = await this.queryBlogsRepository.getPostForBlogById(req.params.id, formatQueryPostsData(req.query) as TPostsQuery, req.userId);
 
             res.status(HttpStatusCodeEnum.OK_200).json(posts);
         } else {
@@ -74,7 +74,7 @@ export class BlogsController {
         const {result, data} = await this.blogsService.createPostForBlog(req.params.id, req.body);
 
         if (result === "SUCCESS") {
-            const newPost = await this.queryPostsRepository.getPostById(data!);
+            const newPost = await this.queryPostsRepository.getPostById(data!, req.userId);
 
             res.status(HttpStatusCodeEnum.CREATED_201).json(newPost!)
         } else {

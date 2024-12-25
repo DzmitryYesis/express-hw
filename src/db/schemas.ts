@@ -1,5 +1,14 @@
 import mongoose from "mongoose";
-import {TBlogDB, TCommentDB, TLogRequestsDB, TPasswordRecoveryDB, TPostDB, TSessionsDB, TUserDB} from "./types";
+import {
+    TBlogDB,
+    TCommentDB,
+    TLikeInfoDB,
+    TLogRequestsDB,
+    TPasswordRecoveryDB,
+    TPostDB,
+    TSessionsDB,
+    TUserDB
+} from "./types";
 import {WithId} from "mongodb";
 
 export const BlogSchema = new mongoose.Schema<WithId<TBlogDB>>({
@@ -10,6 +19,12 @@ export const BlogSchema = new mongoose.Schema<WithId<TBlogDB>>({
     isMembership: {type: Boolean, required: true},
 })
 
+const LikesInfoDBSchema = new mongoose.Schema<TLikeInfoDB>({
+    userId: {type: String, required: true},
+    addedAt: {type: String, required: true},
+    login: {type: String, required: true},
+})
+
 export const PostSchema = new mongoose.Schema<WithId<TPostDB>>({
     title: {type: String, required: true},
     shortDescription: {type: String, required: true},
@@ -17,6 +32,10 @@ export const PostSchema = new mongoose.Schema<WithId<TPostDB>>({
     blogId: {type: String, required: true},
     blogName: {type: String, required: true},
     createdAt: {type: String, required: true},
+    extendedLikesInfo: {
+        likes: {type: [LikesInfoDBSchema], required: true},
+        dislikes: {type: [LikesInfoDBSchema], required: true}
+    }
 })
 
 export const UserSchema = new mongoose.Schema<WithId<TUserDB>>({

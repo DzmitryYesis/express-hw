@@ -23,12 +23,14 @@ export const postsRouter = Router();
 const postsController = container.get(PostsController);
 
 postsRouter.get('/',
+    checkAccessTokenMiddleware,
     ...postsQueriesValidator,
     queryFieldsMiddleware,
     postsController.getPosts.bind(postsController)
 );
 
 postsRouter.get('/:id',
+    checkAccessTokenMiddleware,
     postsController.getPostById.bind(postsController)
 );
 
@@ -41,6 +43,7 @@ postsRouter.get('/:id/comments',
 );
 
 postsRouter.post('/',
+    checkAccessTokenMiddleware,
     authBasicMiddleware,
     postTitleValidator,
     postShortDescriptionValidator,

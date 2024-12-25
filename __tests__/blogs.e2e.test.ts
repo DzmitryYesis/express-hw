@@ -1,19 +1,19 @@
 import {
     authBasic,
     createBlogInputBody,
-    getStringWithLength,
-    invalidBlogId,
     createdBlog,
     createdBlogs,
-    req,
-    createPostForBlogByIdInputBody,
     createdPostForBlogByBlogId,
     createdPostsForBlogByBlogId,
+    createPostForBlogByIdInputBody,
+    getStringWithLength,
+    invalidBlogId,
+    req,
     testDbName
 } from './helpers';
 import {SETTINGS} from '../src/settings';
-import {HttpStatusCodeEnum} from '../src/constants';
-import {TErrorMessage, TBlog, TPost} from '../src/types';
+import {HttpStatusCodeEnum, LikeStatusEnum} from '../src/constants';
+import {TBlog, TErrorMessage, TPost} from '../src/types';
 import 'jest-extended';
 import dotenv from "dotenv";
 import mongoose from "mongoose";
@@ -540,7 +540,13 @@ describe('test CRUD flow for blogs', () => {
                 createdAt: expect.any(String),
                 blogId: blob1.id,
                 blogName: blob1.name,
-                ...post1
+                ...post1,
+                extendedLikesInfo: {
+                    likesCount: 0,
+                    dislikesCount: 0,
+                    myStatus: LikeStatusEnum.NONE,
+                    newestLikes: []
+                }
             } as TPost);
         })
 

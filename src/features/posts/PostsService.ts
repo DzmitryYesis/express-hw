@@ -14,7 +14,8 @@ export class PostsService {
         @inject(PostsRepository) protected postsRepository: PostsRepository,
         @inject(UsersRepository) protected usersRepository: UsersRepository,
         @inject(CommentsRepository) protected commentsRepository: CommentsRepository
-    ) {}
+    ) {
+    }
 
     async findPostById(id: string): Promise<TResultServiceObj<TPostDB>> {
         const post = await this.postsRepository.findPostById(id);
@@ -33,7 +34,11 @@ export class PostsService {
             const newPost: Omit<TPostDB, '_id'> = {
                 blogName: blog.name,
                 createdAt: new Date().toISOString(),
-                ...data
+                ...data,
+                extendedLikesInfo: {
+                    likes: [],
+                    dislikes: []
+                }
             }
 
             const insertedId = await this.postsRepository.createPost(newPost);

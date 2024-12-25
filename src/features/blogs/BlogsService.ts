@@ -41,7 +41,11 @@ export class BlogsService {
                 blogName: findBlogByIdData!.name,
                 blogId: blogId,
                 createdAt: new Date().toISOString(),
-                ...data
+                ...data,
+                extendedLikesInfo: {
+                    likes: [],
+                    dislikes: [],
+                }
             }
             const insertedId = await this.postsRepository.createPost(newPost);
 

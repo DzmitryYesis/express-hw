@@ -3,3 +3,4 @@ export * from './jwtService';
 export * from './createServiceResultObj';
 export * from './sendEmailService';
 export * from './getUserLikeStatus';
+export * from './getThreeLastLikes';

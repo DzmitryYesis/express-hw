@@ -30,7 +30,7 @@ export class PostsController {
     ) {}
 
     async getPosts(req: RequestWithQuery<TPostsQuery>, res: Response<TResponseWithPagination<TPost[]>>) {
-        const posts = await this.queryPostsRepository.getPosts(formatQueryPostsData(req.query) as TPostsQuery) as TResponseWithPagination<TPost[]>;
+        const posts = await this.queryPostsRepository.getPosts(formatQueryPostsData(req.query) as TPostsQuery, req.userId) as TResponseWithPagination<TPost[]>;
 
         res
             .status(HttpStatusCodeEnum.OK_200)
@@ -40,7 +40,7 @@ export class PostsController {
     async getPostById(
         req: RequestWithParam<{ id: string }>,
         res: Response<TPost>) {
-        const post = await this.queryPostsRepository.getPostById(req.params.id)
+        const post = await this.queryPostsRepository.getPostById(req.params.id, req.userId)
         if (post) {
             res
                 .status(HttpStatusCodeEnum.OK_200)
@@ -68,7 +68,7 @@ export class PostsController {
         const {result, data} = await this.postsService.createPost(req.body);
 
         if (result === "SUCCESS" && data) {
-            const newPost = await this.queryPostsRepository.getPostById(data);
+            const newPost = await this.queryPostsRepository.getPostById(data, req.userId);
 
             res.status(HttpStatusCodeEnum.CREATED_201).json(newPost!)
         } else {

@@ -1,6 +1,7 @@
 import {Router} from 'express';
 import {
     authBasicMiddleware,
+    checkAccessTokenMiddleware,
     inputCheckErrorsMiddleware,
     queryFieldsMiddleware
 } from '../../global-middlewares';
@@ -35,6 +36,7 @@ blogsRouter.get('/:id',
 );
 
 blogsRouter.get('/:id/posts',
+    checkAccessTokenMiddleware,
     blogIdValidator,
     ...postsQueriesValidator,
     queryFieldsMiddleware,
@@ -51,6 +53,7 @@ blogsRouter.post('/',
 )
 
 blogsRouter.post('/:id/posts',
+    checkAccessTokenMiddleware,
     authBasicMiddleware,
     blogIdValidator,
     postTitleValidator,

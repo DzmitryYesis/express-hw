@@ -188,7 +188,13 @@ describe('test CRUD flow for posts', () => {
                 shortDescription: post.shortDescription,
                 blogId: blog1.id,
                 blogName: blog1.name,
-                createdAt: expect.any(String)
+                createdAt: expect.any(String),
+                extendedLikesInfo: {
+                    likesCount: 0,
+                    dislikesCount: 0,
+                    myStatus: LikeStatusEnum.NONE,
+                    newestLikes: []
+                }
             } as TPost);
         })
 

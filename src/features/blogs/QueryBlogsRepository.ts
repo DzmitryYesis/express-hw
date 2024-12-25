@@ -1,7 +1,8 @@
 import {ObjectId} from "mongodb";
 import {TResponseWithPagination, TBlog, TBlogsQuery, TPostsQuery, TPost} from "../../types";
-import {BlogModel, PostModel} from "../../db";
+import {BlogModel, PostModel, TPostDB} from "../../db";
 import {injectable} from "inversify";
+import {getThreeLastLikes, getUserLikeStatus} from "../../utils";
 
 @injectable()
 export class QueryBlogsRepository {
@@ -53,7 +54,7 @@ export class QueryBlogsRepository {
         return null
     }
 
-    async getPostForBlogById(id: string, queryData: TPostsQuery): Promise<TResponseWithPagination<TPost[]>> {
+    async getPostForBlogById(id: string, queryData: TPostsQuery, userId: string | null): Promise<TResponseWithPagination<TPost[]>> {
         const posts = await PostModel
             .find({blogId: id})
             .sort({[queryData.sortBy]: queryData.sortDirection === 'asc' ? 1 : -1})
@@ -68,15 +69,31 @@ export class QueryBlogsRepository {
             page: +queryData.pageNumber,
             pageSize: +queryData.pageSize,
             totalCount,
-            items: posts.map(p => ({
-                id: p._id.toString(),
-                title: p.title,
-                content: p.content,
-                shortDescription: p.shortDescription,
-                blogName: p.blogName,
-                blogId: p.blogId,
-                createdAt: p.createdAt
-            }))
+            items: posts.map((p: TPostDB) => {
+                const userLikeStatus = getUserLikeStatus(
+                    userId,
+                    {
+                        likes: p.extendedLikesInfo.likes.map(l => l.userId),
+                        dislikes: p.extendedLikesInfo.dislikes.map(d => d.userId)
+                    }
+                )
+
+                return {
+                    id: p._id.toString(),
+                    title: p.title,
+                    content: p.content,
+                    shortDescription: p.shortDescription,
+                    blogName: p.blogName,
+                    blogId: p.blogId,
+                    createdAt: p.createdAt,
+                    extendedLikesInfo: {
+                        likesCount: p.extendedLikesInfo.likes.length,
+                        dislikesCount: p.extendedLikesInfo.dislikes.length,
+                        myStatus: userLikeStatus,
+                        newestLikes: getThreeLastLikes(p.extendedLikesInfo.likes)
+                    }
+                }
+            })
         }
     }
 }
