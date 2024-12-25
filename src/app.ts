@@ -2,15 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from "cookie-parser";
 import {SETTINGS} from './settings';
-import {
-    blogsRouter,
-    postsRouter,
-    authRouter,
-    userRouter,
-    testingRouter,
-    commentsRouter,
-    securityRouter
-} from './features';
+import {blogsRouter} from "./features/blogs/blogs-router";
+import {postsRouter} from "./features/posts/posts-router";
+import {authRouter, securityRouter, userRouter} from "./features/users/routers";
+import {commentsRouter} from "./features/comments/comments-router";
+import {testingRouter} from "./features/testing/testing-router";
 
 export const app = express();
 

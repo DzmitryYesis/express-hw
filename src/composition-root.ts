@@ -1,32 +1,17 @@
+import {BlogsController, BlogsRepository, BlogsService, QueryBlogsRepository} from "./features/blogs";
+import {PostsController, PostsRepository, PostsService, QueryPostsRepository} from "./features/posts";
+import {CommentsController, CommentsRepository, CommentsService, QueryCommentsRepository} from "./features/comments";
 import {
-    BlogsRepository,
-    BlogsService,
-    CommentsRepository,
-    LogRequestsRepository,
-    PostsRepository,
-    QueryBlogsRepository,
-    QueryCommentsRepository,
-    QueryPostsRepository,
-    TestingRepository,
-    BlogsController,
+    PasswordRecoveryRepository,
     QueryDevicesRepository,
     QueryUsersRepository,
     SessionsRepository,
     UsersRepository,
-    PasswordRecoveryRepository,
-    PostsService,
-    CommentsService,
-    UsersService,
-    CommentsController,
-    LogRequestService,
-    TestingController,
-    PostsController,
-    AuthController,
-    SecurityController,
-    UsersController
-} from "./features";
-
-console.log('QueryBlogsRepository: ', QueryBlogsRepository)
+    UsersService
+} from "./features/users";
+import {LogRequestService, LogRequestsRepository} from "./features/logRequests";
+import {TestingController, TestingRepository} from "./features/testing";
+import {AuthController, SecurityController, UsersController} from "./features/users/controllers";
 
 //query repositories
 const queryBlogsRepository = new QueryBlogsRepository();
