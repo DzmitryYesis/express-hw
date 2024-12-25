@@ -1,7 +1,9 @@
 import {TBlogDB, BlogModel} from '../../db';
 import {TInputBlog} from '../../types';
 import {ObjectId} from 'mongodb';
+import {injectable} from "inversify";
 
+@injectable()
 export class BlogsRepository {
     async createBlog(data: Omit<TBlogDB, '_id'>): Promise<string> {
         const result = await BlogModel.create({...data} as TBlogDB);

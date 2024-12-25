@@ -19,14 +19,15 @@ import {formatQueryCommentsData, formatQueryPostsData} from "../../utils";
 import {HttpStatusCodeEnum} from "../../constants";
 import {PostsService} from "./PostsService";
 import {QueryCommentsRepository} from "../comments";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class PostsController {
     constructor(
-        protected queryPostsRepository: QueryPostsRepository,
-        protected postsService: PostsService,
-        protected queryCommentsRepository: QueryCommentsRepository
-    ) {
-    }
+        @inject(QueryPostsRepository) protected queryPostsRepository: QueryPostsRepository,
+        @inject(PostsService) protected postsService: PostsService,
+        @inject(QueryCommentsRepository) protected queryCommentsRepository: QueryCommentsRepository
+    ) {}
 
     async getPosts(req: RequestWithQuery<TPostsQuery>, res: Response<TResponseWithPagination<TPost[]>>) {
         const posts = await this.queryPostsRepository.getPosts(formatQueryPostsData(req.query) as TPostsQuery) as TResponseWithPagination<TPost[]>;

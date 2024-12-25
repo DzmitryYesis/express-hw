@@ -1,7 +1,9 @@
 import {ObjectId} from "mongodb";
 import {TResponseWithPagination, TBlog, TBlogsQuery, TPostsQuery, TPost} from "../../types";
 import {BlogModel, PostModel} from "../../db";
+import {injectable} from "inversify";
 
+@injectable()
 export class QueryBlogsRepository {
     async getBlogs(queryData: TBlogsQuery): Promise<TResponseWithPagination<TBlog[]>> {
         const blogs = await BlogModel

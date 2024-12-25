@@ -1,6 +1,8 @@
 import {TPasswordRecoveryDB, PasswordRecoveryModel} from "../../db";
 import {ObjectId} from "mongodb";
+import {injectable} from "inversify";
 
+@injectable()
 export class PasswordRecoveryRepository {
     async createPasswordRecovery(data: Omit<TPasswordRecoveryDB, '_id'>): Promise<string> {
         const result = await PasswordRecoveryModel.create({...data} as TPasswordRecoveryDB);

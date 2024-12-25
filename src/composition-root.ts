@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import {BlogsController, BlogsRepository, BlogsService, QueryBlogsRepository} from "./features/blogs";
 import {PostsController, PostsRepository, PostsService, QueryPostsRepository} from "./features/posts";
 import {CommentsController, CommentsRepository, CommentsService, QueryCommentsRepository} from "./features/comments";
@@ -12,36 +13,39 @@ import {
 import {LogRequestService, LogRequestsRepository} from "./features/logRequests";
 import {TestingController, TestingRepository} from "./features/testing";
 import {AuthController, SecurityController, UsersController} from "./features/users/controllers";
+import {Container} from "inversify";
+
+export const container = new Container();
 
 //query repositories
-const queryBlogsRepository = new QueryBlogsRepository();
-const queryPostsRepository = new QueryPostsRepository();
-const queryCommentsRepository = new QueryCommentsRepository();
-const queryDevicesRepository = new QueryDevicesRepository();
-const queryUsersRepository = new QueryUsersRepository();
+container.bind(QueryBlogsRepository).to(QueryBlogsRepository)
+container.bind(QueryPostsRepository).to(QueryPostsRepository)
+container.bind(QueryCommentsRepository).to(QueryCommentsRepository)
+container.bind(QueryDevicesRepository).to(QueryDevicesRepository)
+container.bind(QueryUsersRepository).to(QueryUsersRepository)
 
 //repositories
-const blogsRepository = new BlogsRepository();
-const postsRepository = new PostsRepository();
-const commentsRepository = new CommentsRepository();
-const logRequestRepository = new LogRequestsRepository();
-const testingRepository = new TestingRepository();
-const passwordRecoveryRepository = new PasswordRecoveryRepository();
-const sessionsRepository = new SessionsRepository();
-const usersRepository = new UsersRepository();
+container.bind(BlogsRepository).to(BlogsRepository)
+container.bind(PostsRepository).to(PostsRepository)
+container.bind(CommentsRepository).to(CommentsRepository)
+container.bind(LogRequestsRepository).to(LogRequestsRepository)
+container.bind(TestingRepository).to(TestingRepository)
+container.bind(PasswordRecoveryRepository).to(PasswordRecoveryRepository)
+container.bind(SessionsRepository).to(SessionsRepository)
+container.bind(UsersRepository).to(UsersRepository)
 
 //services
-export const blogsService = new BlogsService(blogsRepository, postsRepository);
-const postsService = new PostsService(blogsRepository, postsRepository, usersRepository, commentsRepository);
-const commentsService = new CommentsService(commentsRepository);
-export const logRequestsService = new LogRequestService(logRequestRepository);
-export const usersService = new UsersService(usersRepository, sessionsRepository, passwordRecoveryRepository);
+container.bind(BlogsService).to(BlogsService)
+container.bind(PostsService).to(PostsService)
+container.bind(CommentsService).to(CommentsService)
+container.bind(LogRequestService).to(LogRequestService)
+container.bind(UsersService).to(UsersService)
 
 //controllers
-export const blogsController = new BlogsController(blogsService, queryBlogsRepository, queryPostsRepository);
-export const commentsController = new CommentsController(queryCommentsRepository, commentsService);
-export const testingController = new TestingController(testingRepository);
-export const postsController = new PostsController(queryPostsRepository, postsService, queryCommentsRepository);
-export const authController = new AuthController(usersService, queryUsersRepository);
-export const securityController = new SecurityController(queryDevicesRepository, usersService);
-export const usersController = new UsersController(queryUsersRepository, usersService);
+container.bind(BlogsController).to(BlogsController)
+container.bind(CommentsController).to(CommentsController)
+container.bind(TestingController).to(TestingController)
+container.bind(PostsController).to(PostsController)
+container.bind(AuthController).to(AuthController)
+container.bind(SecurityController).to(SecurityController)
+container.bind(UsersController).to(UsersController)

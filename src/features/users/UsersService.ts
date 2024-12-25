@@ -15,13 +15,15 @@ import {add} from "date-fns";
 import {SessionsRepository} from "./SessionsRepository";
 import {SETTINGS} from "../../settings";
 import {PasswordRecoveryRepository} from "./PasswordRecoveryRepository";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class UsersService {
     constructor(
-        protected usersRepository: UsersRepository,
-        protected sessionsRepository: SessionsRepository,
-        protected passwordRecoveryRepository: PasswordRecoveryRepository
-        ) {}
+        @inject(UsersRepository) protected usersRepository: UsersRepository,
+        @inject(SessionsRepository) protected sessionsRepository: SessionsRepository,
+        @inject(PasswordRecoveryRepository) protected passwordRecoveryRepository: PasswordRecoveryRepository
+    ) {}
 
     async createUser(data: TInputUser, isAdmin = false): Promise<TResultServiceObj<TOutPutErrorsType | string>> {
         const {

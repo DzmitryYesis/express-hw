@@ -1,6 +1,9 @@
 import {body, param, query} from 'express-validator';
 import {querySortBy} from "../../../constants";
-import {blogsService} from "../../../composition-root";
+import {container} from "../../../composition-root";
+import {BlogsService} from "../../blogs";
+
+const blogsService = container.resolve(BlogsService);
 
 export const postTitleValidator = body('title')
     .trim()

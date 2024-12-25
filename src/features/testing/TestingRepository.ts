@@ -7,7 +7,9 @@ import {
     SessionModel,
     UserModel
 } from "../../db";
+import {injectable} from "inversify";
 
+@injectable()
 export class TestingRepository {
     async deleteAllData() {
         await BlogModel.deleteMany({});

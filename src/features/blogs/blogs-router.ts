@@ -17,9 +17,12 @@ import {
     postShortDescriptionValidator,
     postTitleValidator
 } from "../posts/middlewares";
-import {blogsController} from "../../composition-root";
+import {container} from "../../composition-root";
+import {BlogsController} from "./BlogsController";
 
 export const blogsRouter = Router();
+
+const blogsController = container.get(BlogsController);
 
 blogsRouter.get('/',
     ...blogQueriesValidator,

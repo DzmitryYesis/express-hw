@@ -3,10 +3,12 @@ import {TInputComment, TResultServiceObj} from "../../types";
 import {TCommentDB} from "../../db";
 import {createServiceResultObj} from "../../utils";
 import {LikeStatusEnum} from "../../constants";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class CommentsService {
     constructor(
-        protected commentsRepository: CommentsRepository
+        @inject(CommentsRepository) protected commentsRepository: CommentsRepository
     ) {}
 
     async findCommentById(id: string): Promise<TResultServiceObj<TCommentDB>> {

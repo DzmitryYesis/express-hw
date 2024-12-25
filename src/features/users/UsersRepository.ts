@@ -1,6 +1,8 @@
 import {TUserDB, UserModel} from "../../db";
 import {ObjectId} from "mongodb";
+import {injectable} from "inversify";
 
+@injectable()
 export class UsersRepository {
     async createUser(data: Omit<TUserDB, '_id'>): Promise<string> {
         const result = await UserModel.create({...data} as TUserDB);

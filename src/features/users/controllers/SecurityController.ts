@@ -4,13 +4,14 @@ import {HttpStatusCodeEnum} from "../../../constants";
 import {RequestWithParam, TDevice} from "../../../types/";
 import {UsersService} from "../UsersService";
 import {SETTINGS} from "../../../settings";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class SecurityController {
     constructor(
-        protected queryDevicesRepository: QueryDevicesRepository,
-        protected usersService: UsersService,
-    ) {
-    }
+        @inject(QueryDevicesRepository) protected queryDevicesRepository: QueryDevicesRepository,
+        @inject(UsersService) protected usersService: UsersService,
+    ) {}
 
     async getDevices(req: Request, res: Response<TDevice[]>) {
         const devicesData = await this.queryDevicesRepository.getUserDevices(req.userId!);

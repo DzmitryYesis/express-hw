@@ -1,6 +1,8 @@
 import {TSessionsDB, SessionModel} from "../../db";
 import {ObjectId} from "mongodb";
+import {injectable} from "inversify";
 
+@injectable()
 export class SessionsRepository {
     async addSession(data: Omit<TSessionsDB, '_id'>): Promise<string> {
         const result = await SessionModel.create({...data} as TSessionsDB);

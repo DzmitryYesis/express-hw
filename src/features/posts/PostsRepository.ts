@@ -1,7 +1,9 @@
 import {TPostDB, PostModel} from '../../db';
 import {TInputPost} from '../../types';
 import {ObjectId} from 'mongodb';
+import {injectable} from "inversify";
 
+@injectable()
 export class PostsRepository {
     async createPost(data: Omit<TPostDB, '_id'>): Promise<string> {
         const result = await PostModel.create({...data} as TPostDB);

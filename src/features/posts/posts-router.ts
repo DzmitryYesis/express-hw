@@ -15,9 +15,12 @@ import {
     postTitleValidator
 } from './middlewares';
 import {commentContentValidator, comments} from "../comments";
-import {postsController} from "../../composition-root";
+import {container} from "../../composition-root";
+import {PostsController} from "./PostsController";
 
 export const postsRouter = Router();
+
+const postsController = container.get(PostsController);
 
 postsRouter.get('/',
     ...postsQueriesValidator,

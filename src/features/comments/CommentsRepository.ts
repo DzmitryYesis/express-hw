@@ -1,7 +1,9 @@
 import {TCommentDB, CommentModel} from "../../db";
 import {ObjectId} from "mongodb";
 import {TInputComment} from "../../types";
+import {injectable} from "inversify";
 
+@injectable()
 export class CommentsRepository {
     async createComment(data: Omit<TCommentDB, '_id'>): Promise<string> {
         const result = await CommentModel.create({...data} as TCommentDB);

@@ -1,8 +1,11 @@
 import {Router} from "express";
 import {authRefreshTokenMiddleware} from "../../../../global-middlewares";
-import {securityController} from "../../../../composition-root";
+import {container} from "../../../../composition-root";
+import {SecurityController} from "../../controllers";
 
 export const securityRouter = Router();
+
+const securityController = container.get(SecurityController);
 
 securityRouter.get('/',
     authRefreshTokenMiddleware,

@@ -15,11 +15,13 @@ import {UsersService} from "../UsersService";
 import {HttpStatusCodeEnum} from "../../../constants";
 import {SETTINGS} from "../../../settings";
 import {QueryUsersRepository} from "../QueryUsersRepository";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class AuthController {
     constructor(
-        protected usersService: UsersService,
-        protected queryUsersRepository: QueryUsersRepository,
+        @inject(UsersService) protected usersService: UsersService,
+        @inject(QueryUsersRepository) protected queryUsersRepository: QueryUsersRepository,
     ) {}
 
     async userRegistration(req: RequestWithBody<TInputUser>, res: Response<TOutPutErrorsType>) {

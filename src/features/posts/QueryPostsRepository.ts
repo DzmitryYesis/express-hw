@@ -8,7 +8,9 @@ import {
 } from "../../types";
 import {TCommentDB, CommentModel, PostModel} from "../../db";
 import {getUserLikeStatus} from "../../utils";
+import {injectable} from "inversify";
 
+@injectable()
 export class QueryPostsRepository {
     async getPosts(queryData: TPostsQuery): Promise<TResponseWithPagination<TPost[]>> {
         const posts = await PostModel
