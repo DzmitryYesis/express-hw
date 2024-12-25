@@ -1,2 +1,2 @@
-export * from './testing-router';
-export * from './testing-repository';
+export {TestingRepository} from './TestingRepository';
+export {TestingController} from './TestingController';

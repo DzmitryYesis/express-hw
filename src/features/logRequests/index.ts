@@ -1,2 +1,2 @@
-export * from './logRequests-repository';
-export * from './logRequest-service';
+export {LogRequestsRepository} from './LogRequestsRepository';
+export {LogRequestService} from './LogRequestService';

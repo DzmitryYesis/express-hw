@@ -1,3 +1,3 @@
-export * from './authControllers';
-export * from './userControllers';
-export * from './securityControllers';
+export {AuthController} from './AuthController';
+export {SecurityController} from './SecurityController';
+export {UsersController} from './UsersController';

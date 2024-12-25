@@ -1,3 +1,5 @@
+import {LikeStatusEnum} from "../constants";
+
 export type TBlog = {
     id: string,
     name: string,
@@ -34,6 +36,12 @@ export type TPersonalData = {
     userId: string,
 }
 
+export type TCommentLikeInfo = {
+    likesCount: number,
+    dislikesCount: number,
+    myStatus: LikeStatusEnum,
+}
+
 export type TComment = {
     id: string,
     content: string,
@@ -41,7 +49,8 @@ export type TComment = {
         userId: string,
         userLogin: string
     },
-    createdAt: string
+    createdAt: string,
+    likesInfo: TCommentLikeInfo
 }
 
 export type TDevice = {

@@ -1,17 +1,6 @@
-import {Router, Request, Response} from 'express';
-import {HttpStatusCodeEnum} from '../../constants';
-import {testingRepository} from "./testing-repository";
+import {Router} from 'express';
+import {testingController} from "../../composition-root";
 
 export const testingRouter = Router();
 
-const testingController = {
-    deleteAllData: async (req: Request, res: Response) => {
-        await testingRepository.deleteAllData();
-
-        res
-            .status(HttpStatusCodeEnum.NO_CONTENT_204)
-            .end()
-    }
-}
-
-testingRouter.delete('/', testingController.deleteAllData)
+testingRouter.delete('/', testingController.deleteAllData.bind(testingController));

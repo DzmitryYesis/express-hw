@@ -1,28 +1,37 @@
 import {Router} from "express";
 import {
-    DeleteCommentByIdController,
-    GetCommentsByIdController,
-    UpdateCommentByIdController
-} from "./controllers";
-import {
     authBearerMiddleware,
+    checkAccessTokenMiddleware,
     inputCheckErrorsMiddleware
 } from "../../global-middlewares";
-import {commentContentValidator} from "./middlewares";
+import {
+    commentContentValidator,
+    commentLikeValidator
+} from "./middlewares";
+import {commentsController} from "../../composition-root";
 
 export const commentsRouter = Router();
 
 commentsRouter.get('/:id',
-    GetCommentsByIdController
+    checkAccessTokenMiddleware,
+    commentsController.getCommentById.bind(commentsController)
 )
 
 commentsRouter.put('/:id',
     authBearerMiddleware,
     commentContentValidator,
     inputCheckErrorsMiddleware,
-    UpdateCommentByIdController
+    commentsController.updateComment.bind(commentsController)
 );
+
+commentsRouter.put('/:id/like-status',
+    authBearerMiddleware,
+    commentLikeValidator,
+    inputCheckErrorsMiddleware,
+    commentsController.likeForComment.bind(commentsController)
+)
+
 commentsRouter.delete('/:id',
     authBearerMiddleware,
-    DeleteCommentByIdController
+    commentsController.deleteComment.bind(commentsController)
 )
