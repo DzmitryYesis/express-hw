@@ -15,14 +15,14 @@ import {
     testDbName
 } from './helpers';
 import {HttpStatusCodeEnum, LikeStatusEnum} from '../src/constants';
-import {TComment, TErrorMessage, TInputComment, TInputPost, TPost} from '../src/types';
+import {TComment, TErrorMessage, TInputComment, TInputLikeComment, TInputPost, TPost} from '../src/types';
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
 dotenv.config()
 
 describe('test CRUD flow for posts', () => {
-    const mongoURI = process.env.MONGO_URL || SETTINGS.MONGO_URL
+        const mongoURI = process.env.MONGO_URL || SETTINGS.MONGO_URL
 
         beforeAll(async () => {
             await mongoose.connect(`${mongoURI}/${testDbName}`)
@@ -188,7 +188,13 @@ describe('test CRUD flow for posts', () => {
                 shortDescription: post.shortDescription,
                 blogId: blog1.id,
                 blogName: blog1.name,
-                createdAt: expect.any(String)
+                createdAt: expect.any(String),
+                extendedLikesInfo: {
+                    likesCount: 0,
+                    dislikesCount: 0,
+                    myStatus: LikeStatusEnum.NONE,
+                    newestLikes: []
+                }
             } as TPost);
         })
 
@@ -738,6 +744,403 @@ describe('test CRUD flow for posts', () => {
                 items: comments.sort((a: TComment, b: TComment) => b.content.localeCompare(a.content)).reverse().slice(28, 32)
             });
             expect(res.body.items.length).toBe(4)
+        })
+
+        it('should return response with error NOT_FOUND for like post request', async () => {
+            await createdPost(1);
+            const {accessToken} = await loggedInUser();
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${invalidPostId}/like-status`)
+                .set('authorization', `Bearer ${accessToken}`)
+                .send({likeStatus: 'Like'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NOT_FOUND_404)
+        })
+
+        it('should return response with error NOT_AUTH for like post request', async () => {
+            const {post} = await createdPost(1);
+            await loggedInUser();
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${'bla-bla-token'}`)
+                .send({likeStatus: 'Like'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NOT_AUTH_401)
+        })
+
+        it('should return response with error BAD_REQUEST when send likeStatus: `` for like post request', async () => {
+            const {post} = await createdPost(1);
+            const {accessToken} = await loggedInUser();
+
+            const res = await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessToken}`)
+                .send({likeStatus: ''} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.BAD_REQUEST_400)
+
+            console.log(res.body)
+
+            expect(res.body).toHaveProperty('errorsMessages');
+            expect(Array.isArray(res.body.errorsMessages)).toBe(true);
+            expect(res.body.errorsMessages).toHaveLength(1);
+
+            expect(res.body.errorsMessages).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        field: 'likeStatus',
+                        message: expect.any(String),
+                    }),
+                ])
+            );
+        })
+
+        it('should return response with error BAD_REQUEST when send likeStatus: wrong format for like post request', async () => {
+            const {post} = await createdPost(1);
+            const {accessToken} = await loggedInUser();
+
+            const res = await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessToken}`)
+                .send({likeStatus: 'blabla'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.BAD_REQUEST_400)
+
+            console.log(res.body)
+
+            expect(res.body).toHaveProperty('errorsMessages');
+            expect(Array.isArray(res.body.errorsMessages)).toBe(true);
+            expect(res.body.errorsMessages).toHaveLength(1);
+
+            expect(res.body.errorsMessages).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        field: 'likeStatus',
+                        message: expect.any(String),
+                    }),
+                ])
+            );
+        })
+
+        it('should add like for post', async () => {
+            const {post} = await createdPost(1);
+            const {accessToken, user} = await loggedInUser();
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessToken}`)
+                .send({likeStatus: 'Like'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+            const res = await req
+                .get(`${SETTINGS.PATH.POSTS}/${post.id}`)
+                .set('authorization', `Bearer ${accessToken}`)
+                .expect(HttpStatusCodeEnum.OK_200)
+
+            console.log(res.body)
+
+            expect(res.body).toStrictEqual({
+                ...post,
+                extendedLikesInfo: {
+                    likesCount: 1,
+                    dislikesCount: 0,
+                    myStatus: LikeStatusEnum.LIKE,
+                    newestLikes: [{
+                        userId: user.id,
+                        login: user.login,
+                        addedAt: expect.any(String),
+                    }]
+                }
+            } as TPost)
+        })
+
+        it('should add like for post and show myStatus: None for non auth user', async () => {
+            const {post} = await createdPost(1);
+            const {accessToken, user} = await loggedInUser();
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessToken}`)
+                .send({likeStatus: 'Like'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+            const res = await req
+                .get(`${SETTINGS.PATH.POSTS}/${post.id}`)
+                .expect(HttpStatusCodeEnum.OK_200)
+
+            console.log(res.body)
+
+            expect(res.body).toStrictEqual({
+                ...post,
+                extendedLikesInfo: {
+                    likesCount: 1,
+                    dislikesCount: 0,
+                    myStatus: LikeStatusEnum.NONE,
+                    newestLikes: [{
+                        userId: user.id,
+                        login: user.login,
+                        addedAt: expect.any(String),
+                    }]
+                }
+            } as TPost)
+        })
+
+        it('should add like, then dislike for post and show myStatus: Dislike for auth user', async () => {
+            const {post} = await createdPost(1);
+            const {accessToken} = await loggedInUser();
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessToken}`)
+                .send({likeStatus: 'Like'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessToken}`)
+                .send({likeStatus: 'Dislike'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+            const res = await req
+                .get(`${SETTINGS.PATH.POSTS}/${post.id}`)
+                .set('authorization', `Bearer ${accessToken}`)
+                .expect(HttpStatusCodeEnum.OK_200)
+
+            console.log(res.body)
+
+            expect(res.body).toStrictEqual({
+                ...post,
+                extendedLikesInfo: {
+                    likesCount: 0,
+                    dislikesCount: 1,
+                    myStatus: LikeStatusEnum.DISLIKE,
+                    newestLikes: []
+                }
+            } as TPost)
+        })
+
+        it('should add like, then dislike for post and show myStatus: None for non auth user', async () => {
+            const {post} = await createdPost(1);
+            const {accessToken} = await loggedInUser();
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessToken}`)
+                .send({likeStatus: 'Like'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessToken}`)
+                .send({likeStatus: 'Dislike'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+            const res = await req
+                .get(`${SETTINGS.PATH.POSTS}/${post.id}`)
+                .expect(HttpStatusCodeEnum.OK_200)
+
+            console.log(res.body)
+
+            expect(res.body).toStrictEqual({
+                ...post,
+                extendedLikesInfo: {
+                    likesCount: 0,
+                    dislikesCount: 1,
+                    myStatus: LikeStatusEnum.NONE,
+                    newestLikes: []
+                }
+            } as TPost)
+        })
+
+        it('should add dislike, then like for post and show myStatus: None for non auth user', async () => {
+            const {post} = await createdPost(1);
+            const {accessToken, user} = await loggedInUser();
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessToken}`)
+                .send({likeStatus: 'Dislike'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessToken}`)
+                .send({likeStatus: 'Like'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+            const res = await req
+                .get(`${SETTINGS.PATH.POSTS}/${post.id}`)
+                .expect(HttpStatusCodeEnum.OK_200)
+
+            console.log(res.body)
+
+            expect(res.body).toStrictEqual({
+                ...post,
+                extendedLikesInfo: {
+                    likesCount: 1,
+                    dislikesCount: 0,
+                    myStatus: LikeStatusEnum.NONE,
+                    newestLikes: [{
+                        userId: user.id,
+                        login: user.login,
+                        addedAt: expect.any(String)
+                    }]
+                }
+            } as TPost)
+        })
+
+        it('should add like, then like for post and show myStatus: None for non auth user', async () => {
+            const {post} = await createdPost(1);
+            const {accessToken, user} = await loggedInUser();
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessToken}`)
+                .send({likeStatus: 'Like'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessToken}`)
+                .send({likeStatus: 'Like'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+            const res = await req
+                .get(`${SETTINGS.PATH.POSTS}/${post.id}`)
+                .expect(HttpStatusCodeEnum.OK_200)
+
+            console.log(res.body)
+
+            expect(res.body).toStrictEqual({
+                ...post,
+                extendedLikesInfo: {
+                    likesCount: 1,
+                    dislikesCount: 0,
+                    myStatus: LikeStatusEnum.NONE,
+                    newestLikes: [{
+                        userId: user.id,
+                        login: user.login,
+                        addedAt: expect.any(String)
+                    }]
+                }
+            } as TPost)
+        })
+
+        it('should add like from user1, then dislike from user2 for post and show myStatus: None for non auth user1', async () => {
+            const {post} = await createdPost(1);
+            const {accessToken: accessTokenUser1, user: user1} = await loggedInUser(1);
+            const {accessToken: accessTokenUser2} = await loggedInUser(2);
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessTokenUser1}`)
+                .send({likeStatus: 'Like'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessTokenUser2}`)
+                .send({likeStatus: 'Dislike'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+            const res = await req
+                .get(`${SETTINGS.PATH.POSTS}/${post.id}`)
+                .expect(HttpStatusCodeEnum.OK_200)
+
+            console.log(res.body)
+
+            expect(res.body).toStrictEqual({
+                ...post,
+                extendedLikesInfo: {
+                    likesCount: 1,
+                    dislikesCount: 1,
+                    myStatus: LikeStatusEnum.NONE,
+                    newestLikes: [{
+                        userId: user1.id,
+                        login: user1.login,
+                        addedAt: expect.any(String)
+                    }]
+                }
+            } as TPost)
+        })
+
+        it('should add like from user1, then like from user2 for post and show myStatus: Like for auth user2', async () => {
+            const {post} = await createdPost(1);
+            const {accessToken: accessTokenUser1, user: user1} = await loggedInUser(1);
+            const {accessToken: accessTokenUser2, user: user2} = await loggedInUser(2);
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessTokenUser1}`)
+                .send({likeStatus: 'Like'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessTokenUser2}`)
+                .send({likeStatus: 'Like'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+            const res = await req
+                .get(`${SETTINGS.PATH.POSTS}/${post.id}`)
+                .set('authorization', `Bearer ${accessTokenUser2}`)
+                .expect(HttpStatusCodeEnum.OK_200)
+
+            console.log(res.body)
+
+            expect(res.body).toStrictEqual({
+                ...post,
+                extendedLikesInfo: {
+                    likesCount: 2,
+                    dislikesCount: 0,
+                    myStatus: LikeStatusEnum.LIKE,
+                    newestLikes: [
+                        {
+                            userId: user2.id,
+                            login: user2.login,
+                            addedAt: expect.any(String)
+                        },
+                        {
+                            userId: user1.id,
+                            login: user1.login,
+                            addedAt: expect.any(String)
+                        }
+                    ]
+                }
+            } as TPost)
+        })
+
+        it('should add dislike from user1, then dislike from user2 for post and show myStatus: Like for auth user2', async () => {
+            const {post} = await createdPost(1);
+            const {accessToken: accessTokenUser1} = await loggedInUser(1);
+            const {accessToken: accessTokenUser2} = await loggedInUser(2);
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessTokenUser1}`)
+                .send({likeStatus: 'Dislike'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+            await req
+                .put(`${SETTINGS.PATH.POSTS}/${post.id}/like-status`)
+                .set('authorization', `Bearer ${accessTokenUser2}`)
+                .send({likeStatus: 'Dislike'} as TInputLikeComment)
+                .expect(HttpStatusCodeEnum.NO_CONTENT_204)
+
+            const res = await req
+                .get(`${SETTINGS.PATH.POSTS}/${post.id}`)
+                .set('authorization', `Bearer ${accessTokenUser2}`)
+                .expect(HttpStatusCodeEnum.OK_200)
+
+            console.log(res.body)
+
+            expect(res.body).toStrictEqual({
+                ...post,
+                extendedLikesInfo: {
+                    likesCount: 0,
+                    dislikesCount: 2,
+                    myStatus: LikeStatusEnum.DISLIKE,
+                    newestLikes: []
+                }
+            } as TPost)
         })
     }
 )

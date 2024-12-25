@@ -10,9 +10,12 @@ import {
     userPasswordValidator,
     usersQueriesValidator
 } from "../../middlewares";
-import {usersController} from "../../../../composition-root";
+import {container} from "../../../../composition-root";
+import {UsersController} from "../../controllers";
 
 export const userRouter = Router();
+
+const usersController = container.get(UsersController);
 
 userRouter.get('/',
     authBasicMiddleware,

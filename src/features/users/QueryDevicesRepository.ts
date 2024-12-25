@@ -1,7 +1,9 @@
 import {TDevice} from "../../types";
 import {ObjectId} from "mongodb";
 import {SessionModel} from "../../db";
+import {injectable} from "inversify";
 
+@injectable()
 export class QueryDevicesRepository {
     async getUserDevices(userId: string): Promise<TDevice[]> {
         const devices = await SessionModel.find({userId: new ObjectId(userId)}).lean();

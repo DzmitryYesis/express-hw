@@ -9,6 +9,19 @@ export type TBlog = {
     isMembership: boolean
 }
 
+export type TLikeInfo = {
+    addedAt: string,
+    userId: string,
+    login: string
+}
+
+export type TExtendedLikesInfo = {
+    likesCount: number,
+    dislikesCount: number,
+    myStatus: LikeStatusEnum,
+    newestLikes: TLikeInfo[]
+}
+
 export type TPost = {
     id: string,
     title: string,
@@ -17,6 +30,7 @@ export type TPost = {
     blogId: string,
     blogName: string,
     createdAt: string,
+    extendedLikesInfo: TExtendedLikesInfo
 }
 
 export type TUser = {

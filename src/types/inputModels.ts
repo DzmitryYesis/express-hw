@@ -46,3 +46,7 @@ export type TInputComment = {
 export type TInputLikeComment = {
     likeStatus: string
 }
+
+export type TInputLikePost = {
+    likeStatus: string
+}

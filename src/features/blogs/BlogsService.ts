@@ -3,12 +3,15 @@ import {PostsRepository} from '../posts';
 import {TInputBlog, TInputPost, TResultServiceObj} from "../../types";
 import {TBlogDB, TPostDB} from "../../db";
 import {createServiceResultObj} from "../../utils";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class BlogsService {
     constructor(
-        protected blogsRepository: BlogsRepository,
-        protected postsRepository: PostsRepository
-    ) {}
+        @inject(BlogsRepository) protected blogsRepository: BlogsRepository,
+        @inject(PostsRepository) protected postsRepository: PostsRepository
+    ) {
+    }
 
     async findBlogById(blogId: string): Promise<TResultServiceObj<TBlogDB>> {
         const blog = await this.blogsRepository.findBlogById(blogId);
@@ -38,7 +41,11 @@ export class BlogsService {
                 blogName: findBlogByIdData!.name,
                 blogId: blogId,
                 createdAt: new Date().toISOString(),
-                ...data
+                ...data,
+                extendedLikesInfo: {
+                    likes: [],
+                    dislikes: [],
+                }
             }
             const insertedId = await this.postsRepository.createPost(newPost);
 

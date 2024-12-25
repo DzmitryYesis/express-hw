@@ -1,6 +1,9 @@
 import {Response, Request, NextFunction} from 'express';
 import {HttpStatusCodeEnum} from "../constants";
-import {logRequestsService} from "../composition-root";
+import {container} from "../composition-root";
+import {LogRequestService} from "../features/logRequests";
+
+const logRequestsService = container.get(LogRequestService)
 
 export const logRequestMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const ip = req.ip!;

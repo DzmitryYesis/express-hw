@@ -10,11 +10,13 @@ import {
 import {QueryCommentsRepository} from "./QueryCommentsRepository";
 import {HttpStatusCodeEnum} from "../../constants";
 import {CommentsService} from "./CommentsService";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class CommentsController {
     constructor(
-        protected queryCommentsRepository: QueryCommentsRepository,
-        protected commentsService: CommentsService,
+        @inject(QueryCommentsRepository) protected queryCommentsRepository: QueryCommentsRepository,
+        @inject(CommentsService) protected commentsService: CommentsService,
     ) {
     }
 

@@ -2,7 +2,10 @@ import {NextFunction, Request, Response} from "express";
 import {SETTINGS} from "../settings";
 import {HttpStatusCodeEnum} from "../constants";
 import {jwtService} from "../utils";
-import {usersService} from "../composition-root";
+import {container} from "../composition-root";
+import {UsersService} from "../features/users";
+
+const usersService = container.get(UsersService);
 
 export const authRefreshTokenMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     if (!req.cookies[SETTINGS.REFRESH_TOKEN_NAME]) {

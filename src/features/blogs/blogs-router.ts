@@ -1,6 +1,7 @@
 import {Router} from 'express';
 import {
     authBasicMiddleware,
+    checkAccessTokenMiddleware,
     inputCheckErrorsMiddleware,
     queryFieldsMiddleware
 } from '../../global-middlewares';
@@ -17,9 +18,12 @@ import {
     postShortDescriptionValidator,
     postTitleValidator
 } from "../posts/middlewares";
-import {blogsController} from "../../composition-root";
+import {container} from "../../composition-root";
+import {BlogsController} from "./BlogsController";
 
 export const blogsRouter = Router();
+
+const blogsController = container.get(BlogsController);
 
 blogsRouter.get('/',
     ...blogQueriesValidator,
@@ -32,6 +36,7 @@ blogsRouter.get('/:id',
 );
 
 blogsRouter.get('/:id/posts',
+    checkAccessTokenMiddleware,
     blogIdValidator,
     ...postsQueriesValidator,
     queryFieldsMiddleware,
@@ -48,6 +53,7 @@ blogsRouter.post('/',
 )
 
 blogsRouter.post('/:id/posts',
+    checkAccessTokenMiddleware,
     authBasicMiddleware,
     blogIdValidator,
     postTitleValidator,

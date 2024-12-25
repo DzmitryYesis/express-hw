@@ -8,9 +8,12 @@ import {
     commentContentValidator,
     commentLikeValidator
 } from "./middlewares";
-import {commentsController} from "../../composition-root";
+import {container} from "../../composition-root";
+import {CommentsController} from "./CommentsController";
 
 export const commentsRouter = Router();
+
+const commentsController = container.get(CommentsController);
 
 commentsRouter.get('/:id',
     checkAccessTokenMiddleware,

@@ -1,6 +1,9 @@
 import {body, param, query} from 'express-validator';
 import {querySortBy} from "../../../constants";
-import {blogsService} from "../../../composition-root";
+import {container} from "../../../composition-root";
+import {BlogsService} from "../../blogs";
+
+const blogsService = container.resolve(BlogsService);
 
 export const postTitleValidator = body('title')
     .trim()
@@ -49,3 +52,10 @@ export const postsQueriesValidator = [
     query('pageNumber').trim().optional().toInt().isInt(),
     query('pageSize').trim().optional().toInt().isInt()
 ]
+
+export const postLikeValidator = body('likeStatus')
+    .trim()
+    .isString()
+    .withMessage('Must be a string')
+    .isIn(['Like', 'Dislike', 'None'])
+    .withMessage('Must be a string');

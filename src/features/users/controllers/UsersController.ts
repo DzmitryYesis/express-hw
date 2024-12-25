@@ -13,13 +13,14 @@ import {QueryUsersRepository} from "../QueryUsersRepository";
 import {formatQueryUsersData} from "../../../utils";
 import {HttpStatusCodeEnum} from "../../../constants";
 import {UsersService} from "../UsersService";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class UsersController {
     constructor(
-        protected queryUsersRepository: QueryUsersRepository,
-        protected usersService: UsersService,
-    ) {
-    }
+        @inject(QueryUsersRepository) protected queryUsersRepository: QueryUsersRepository,
+        @inject(UsersService) protected usersService: UsersService,
+    ) {}
 
     async getUsers(req: RequestWithQuery<TUsersQuery>, res: Response<TResponseWithPagination<TUser[]>>) {
         const users = await this.queryUsersRepository.getUsers(formatQueryUsersData(req.query));

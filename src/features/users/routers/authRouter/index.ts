@@ -14,9 +14,12 @@ import {
     inputCheckErrorsMiddleware,
     logRequestMiddleware
 } from "../../../../global-middlewares";
-import {authController} from "../../../../composition-root";
+import {container} from "../../../../composition-root";
+import {AuthController} from "../../controllers";
 
 export const authRouter = Router();
+
+const authController = container.get(AuthController);
 
 authRouter.get('/me',
     authBearerMiddleware,

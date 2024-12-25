@@ -12,20 +12,26 @@ import {
     postIdValidator,
     postsQueriesValidator,
     postShortDescriptionValidator,
-    postTitleValidator
+    postTitleValidator,
+    postLikeValidator
 } from './middlewares';
 import {commentContentValidator, comments} from "../comments";
-import {postsController} from "../../composition-root";
+import {container} from "../../composition-root";
+import {PostsController} from "./PostsController";
 
 export const postsRouter = Router();
 
+const postsController = container.get(PostsController);
+
 postsRouter.get('/',
+    checkAccessTokenMiddleware,
     ...postsQueriesValidator,
     queryFieldsMiddleware,
     postsController.getPosts.bind(postsController)
 );
 
 postsRouter.get('/:id',
+    checkAccessTokenMiddleware,
     postsController.getPostById.bind(postsController)
 );
 
@@ -38,6 +44,7 @@ postsRouter.get('/:id/comments',
 );
 
 postsRouter.post('/',
+    checkAccessTokenMiddleware,
     authBasicMiddleware,
     postTitleValidator,
     postShortDescriptionValidator,
@@ -64,6 +71,13 @@ postsRouter.put('/:id',
     inputCheckErrorsMiddleware,
     postsController.updatePost.bind(postsController)
 );
+
+postsRouter.put('/:id/like-status',
+    authBearerMiddleware,
+    postLikeValidator,
+    inputCheckErrorsMiddleware,
+    postsController.likeForPost.bind(postsController)
+    )
 
 postsRouter.delete('/:id',
     authBasicMiddleware,

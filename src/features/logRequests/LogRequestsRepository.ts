@@ -1,5 +1,7 @@
 import {TLogRequestsDB, LogRequestModel} from "../../db";
+import {injectable} from "inversify";
 
+@injectable()
 export class LogRequestsRepository {
     async addLogRequest(data: Omit<TLogRequestsDB, '_id'>) {
         const result = await LogRequestModel.create({...data} as TLogRequestsDB);

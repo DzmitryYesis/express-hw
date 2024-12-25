@@ -1,7 +1,9 @@
 import {TCommentDB, CommentModel} from "../../db";
 import {ObjectId} from "mongodb";
 import {TInputComment} from "../../types";
+import {injectable} from "inversify";
 
+@injectable()
 export class CommentsRepository {
     async createComment(data: Omit<TCommentDB, '_id'>): Promise<string> {
         const result = await CommentModel.create({...data} as TCommentDB);
@@ -19,13 +21,13 @@ export class CommentsRepository {
         return result.matchedCount === 1
     }
 
-    async addValueToLikesInfo(commentId: ObjectId, field: 'likes' | 'dislikes', userId: string): Promise<boolean> {
+    async addValueToLikesOrDislikesInfo(commentId: ObjectId, field: 'likes' | 'dislikes', userId: string): Promise<boolean> {
         const result = await CommentModel.updateOne({_id: commentId}, {$addToSet: {[`likesInfo.${field}`]: userId}});
 
         return result.matchedCount === 1
     }
 
-    async deleteValueFromLikesInfo(commentId: ObjectId, field: 'likes' | 'dislikes', userId: string): Promise<boolean> {
+    async deleteValueFromLikesOrDislikesInfo(commentId: ObjectId, field: 'likes' | 'dislikes', userId: string): Promise<boolean> {
         const result = await CommentModel.updateOne({_id: commentId}, {$pull: {[`likesInfo.${field}`]: userId}});
 
         return result.matchedCount === 1

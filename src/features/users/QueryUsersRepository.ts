@@ -6,7 +6,9 @@ import {
 } from "../../types";
 import {ObjectId} from "mongodb";
 import {UserModel} from "../../db";
+import {injectable} from "inversify";
 
+@injectable()
 export class QueryUsersRepository {
     async getUsers(queryData: TUsersQuery): Promise<TResponseWithPagination<TUser[]>> {
         const users = await UserModel
