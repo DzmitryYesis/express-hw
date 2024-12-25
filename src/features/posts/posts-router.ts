@@ -1,14 +1,5 @@
 import {Router} from 'express';
 import {
-    CreateNewCommentForPostByIdController,
-    DeletePostController,
-    GetCommentsForPostByIdController,
-    GetPostByIdController,
-    GetPostsController,
-    CreatePostController,
-    UpdatePostByIdController
-} from './controllers';
-import {
     authBasicMiddleware,
     authBearerMiddleware,
     checkAccessTokenMiddleware,
@@ -24,14 +15,28 @@ import {
     postTitleValidator
 } from './middlewares';
 import {commentContentValidator, comments} from "../comments";
+import {postsController} from "../../composition-root";
 
 export const postsRouter = Router();
 
 postsRouter.get('/',
     ...postsQueriesValidator,
     queryFieldsMiddleware,
-    GetPostsController
+    postsController.getPosts.bind(postsController)
 );
+
+postsRouter.get('/:id',
+    postsController.getPostById.bind(postsController)
+);
+
+postsRouter.get('/:id/comments',
+    checkAccessTokenMiddleware,
+    postIdValidator,
+    ...comments,
+    queryFieldsMiddleware,
+    postsController.getCommentForPost.bind(postsController)
+);
+
 postsRouter.post('/',
     authBasicMiddleware,
     postTitleValidator,
@@ -39,22 +44,17 @@ postsRouter.post('/',
     postContentValidator,
     postBlogIdValidator,
     inputCheckErrorsMiddleware,
-    CreatePostController)
-postsRouter.get('/:id', GetPostByIdController);
-postsRouter.get('/:id/comments',
-    checkAccessTokenMiddleware,
-    postIdValidator,
-    ...comments,
-    queryFieldsMiddleware,
-    GetCommentsForPostByIdController
-);
+    postsController.createPost.bind(postsController)
+)
+
 postsRouter.post('/:id/comments',
     authBearerMiddleware,
     postIdValidator,
     commentContentValidator,
     inputCheckErrorsMiddleware,
-    CreateNewCommentForPostByIdController
+    postsController.createCommentForPost.bind(postsController)
 );
+
 postsRouter.put('/:id',
     authBasicMiddleware,
     postTitleValidator,
@@ -62,5 +62,10 @@ postsRouter.put('/:id',
     postContentValidator,
     postBlogIdValidator,
     inputCheckErrorsMiddleware,
-    UpdatePostByIdController);
-postsRouter.delete('/:id', authBasicMiddleware, DeletePostController);
+    postsController.updatePost.bind(postsController)
+);
+
+postsRouter.delete('/:id',
+    authBasicMiddleware,
+    postsController.deletePost.bind(postsController)
+);

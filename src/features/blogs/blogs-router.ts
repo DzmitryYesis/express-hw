@@ -1,14 +1,5 @@
 import {Router} from 'express';
 import {
-    DeleteBlogController,
-    GetBlogByIdController,
-    GetBlogsController,
-    CreateBlogController,
-    UpdateBlogByIdController,
-    GetPostsForBlogByIdController,
-    CreateNewPostForBlogByIdController
-} from './controllers';
-import {
     authBasicMiddleware,
     inputCheckErrorsMiddleware,
     queryFieldsMiddleware
@@ -26,28 +17,36 @@ import {
     postShortDescriptionValidator,
     postTitleValidator
 } from "../posts/middlewares";
+import {blogsController} from "../../composition-root";
 
 export const blogsRouter = Router();
 
 blogsRouter.get('/',
     ...blogQueriesValidator,
     queryFieldsMiddleware,
-    GetBlogsController
+    blogsController.getBlogs.bind(blogsController)
 );
+
+blogsRouter.get('/:id',
+    blogsController.getBlogById.bind(blogsController)
+);
+
+blogsRouter.get('/:id/posts',
+    blogIdValidator,
+    ...postsQueriesValidator,
+    queryFieldsMiddleware,
+    blogsController.getPostForBlog.bind(blogsController)
+)
+
 blogsRouter.post('/',
     authBasicMiddleware,
     blogNameValidator,
     blogDescriptionValidator,
     blogWebsiteUrlValidator,
     inputCheckErrorsMiddleware,
-    CreateBlogController)
-blogsRouter.get('/:id', GetBlogByIdController);
-blogsRouter.get('/:id/posts',
-    blogIdValidator,
-    ...postsQueriesValidator,
-    queryFieldsMiddleware,
-    GetPostsForBlogByIdController
+    blogsController.createBlog.bind(blogsController)
 )
+
 blogsRouter.post('/:id/posts',
     authBasicMiddleware,
     blogIdValidator,
@@ -55,13 +54,19 @@ blogsRouter.post('/:id/posts',
     postShortDescriptionValidator,
     postContentValidator,
     inputCheckErrorsMiddleware,
-    CreateNewPostForBlogByIdController,
+    blogsController.createPostForBlog.bind(blogsController)
 )
+
 blogsRouter.put('/:id',
     authBasicMiddleware,
     blogNameValidator,
     blogDescriptionValidator,
     blogWebsiteUrlValidator,
     inputCheckErrorsMiddleware,
-    UpdateBlogByIdController);
-blogsRouter.delete('/:id', authBasicMiddleware, DeleteBlogController);
+    blogsController.updateBlog.bind(blogsController)
+);
+
+blogsRouter.delete('/:id',
+    authBasicMiddleware,
+    blogsController.deleteBlog.bind(blogsController)
+);

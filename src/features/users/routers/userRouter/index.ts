@@ -10,11 +10,7 @@ import {
     userPasswordValidator,
     usersQueriesValidator
 } from "../../middlewares";
-import {
-    DeleteUserController,
-    GetUsersController,
-    CreateUserController
-} from "../../controllers";
+import {usersController} from "../../../../composition-root";
 
 export const userRouter = Router();
 
@@ -22,7 +18,7 @@ userRouter.get('/',
     authBasicMiddleware,
     ...usersQueriesValidator,
     queryFieldsMiddleware,
-    GetUsersController
+    usersController.getUsers.bind(usersController)
 );
 
 userRouter.post('/',
@@ -31,7 +27,10 @@ userRouter.post('/',
     userPasswordValidator,
     userEmailValidator,
     inputCheckErrorsMiddleware,
-    CreateUserController
+    usersController.createUser.bind(usersController)
 );
 
-userRouter.delete('/:id', authBasicMiddleware, DeleteUserController)
+userRouter.delete('/:id',
+    authBasicMiddleware,
+    usersController.deleteUser.bind(usersController)
+)

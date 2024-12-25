@@ -14,21 +14,13 @@ import {
     inputCheckErrorsMiddleware,
     logRequestMiddleware
 } from "../../../../global-middlewares";
-import {
-    LoginController,
-    GetPersonalDataController,
-    RegistrationUserController,
-    RegistrationConfirmationCodeController,
-    RegistrationEmailResendingController,
-    UpdateTokensController,
-    LogoutController, PasswordRecoveryController, NewPasswordController
-} from "../../controllers";
+import {authController} from "../../../../composition-root";
 
 export const authRouter = Router();
 
 authRouter.get('/me',
     authBearerMiddleware,
-    GetPersonalDataController
+    authController.getPersonalData.bind(authController)
 )
 
 authRouter.post('/login',
@@ -36,17 +28,17 @@ authRouter.post('/login',
     authLoginOrEmailValidator,
     authPasswordValidator,
     inputCheckErrorsMiddleware,
-    LoginController
+    authController.login.bind(authController)
 );
 
 authRouter.post('/refresh-token',
     authRefreshTokenMiddleware,
-    UpdateTokensController
+    authController.updateTokens.bind(authController)
 );
 
 authRouter.post('/logout',
     authRefreshTokenMiddleware,
-    LogoutController
+    authController.logout.bind(authController)
 )
 
 authRouter.post('/registration',
@@ -55,28 +47,28 @@ authRouter.post('/registration',
     authPasswordValidator,
     authEmailValidator,
     inputCheckErrorsMiddleware,
-    RegistrationUserController
+    authController.userRegistration.bind(authController)
 );
 
 authRouter.post('/registration-confirmation',
     logRequestMiddleware,
     authConfirmationCodeValidator,
     inputCheckErrorsMiddleware,
-    RegistrationConfirmationCodeController
+    authController.confirmRegistration.bind(authController)
 );
 
 authRouter.post('/registration-email-resending',
     logRequestMiddleware,
     authEmailValidator,
     inputCheckErrorsMiddleware,
-    RegistrationEmailResendingController
+    authController.resendingConfirmCode.bind(authController)
 )
 
 authRouter.post('/password-recovery',
     logRequestMiddleware,
     authEmailValidator,
     inputCheckErrorsMiddleware,
-    PasswordRecoveryController
+    authController.passwordRecovery.bind(authController)
 )
 
 authRouter.post('/new-password',
@@ -84,5 +76,5 @@ authRouter.post('/new-password',
     authPasswordRecoveryCodeValidator,
     authNewPasswordValidator,
     inputCheckErrorsMiddleware,
-    NewPasswordController
-    )
+    authController.newPassword.bind(authController)
+)
