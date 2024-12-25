@@ -52,3 +52,10 @@ export const postsQueriesValidator = [
     query('pageNumber').trim().optional().toInt().isInt(),
     query('pageSize').trim().optional().toInt().isInt()
 ]
+
+export const postLikeValidator = body('likeStatus')
+    .trim()
+    .isString()
+    .withMessage('Must be a string')
+    .isIn(['Like', 'Dislike', 'None'])
+    .withMessage('Must be a string');

@@ -9,15 +9,16 @@ export type TBlogDB = {
     isMembership: boolean
 }
 
-export type TLikeInfoDB = {
+export type TLikePostInfoDB = {
+    _id: ObjectId;
     addedAt: string,
     userId: string,
     login: string
 }
 
 export type TExtendedLikesInfoDB = {
-    likes: TLikeInfoDB[],
-    dislikes: TLikeInfoDB[]
+    likes: TLikePostInfoDB[],
+    dislikes: TLikePostInfoDB[]
 }
 
 export type TPostDB = {
@@ -47,7 +48,7 @@ export type TUserDB = {
     }
 }
 
-export type TLikesInfoDB = {
+export type TLikesCommentInfoDB = {
     likes: string[],
     dislikes: string[],
 }
@@ -61,7 +62,7 @@ export type TCommentDB = {
     },
     postId: string,
     createdAt: string,
-    likesInfo: TLikesInfoDB
+    likesInfo: TLikesCommentInfoDB
 }
 
 export type TSessionsDB = {

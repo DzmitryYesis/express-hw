@@ -12,7 +12,8 @@ import {
     postIdValidator,
     postsQueriesValidator,
     postShortDescriptionValidator,
-    postTitleValidator
+    postTitleValidator,
+    postLikeValidator
 } from './middlewares';
 import {commentContentValidator, comments} from "../comments";
 import {container} from "../../composition-root";
@@ -70,6 +71,13 @@ postsRouter.put('/:id',
     inputCheckErrorsMiddleware,
     postsController.updatePost.bind(postsController)
 );
+
+postsRouter.put('/:id/like-status',
+    authBearerMiddleware,
+    postLikeValidator,
+    inputCheckErrorsMiddleware,
+    postsController.likeForPost.bind(postsController)
+    )
 
 postsRouter.delete('/:id',
     authBasicMiddleware,

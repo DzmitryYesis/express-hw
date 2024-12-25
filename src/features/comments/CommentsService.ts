@@ -44,11 +44,11 @@ export class CommentsService {
 
             if (likeStatus === LikeStatusEnum.LIKE) {
                 if (!likes.includes(userId) && !dislikes.includes(userId)) {
-                    await this.commentsRepository.addValueToLikesInfo(_id, 'likes', userId);
+                    await this.commentsRepository.addValueToLikesOrDislikesInfo(_id, 'likes', userId);
                 }
                 if (!likes.includes(userId) && dislikes.includes(userId)) {
-                    await this.commentsRepository.deleteValueFromLikesInfo(_id, 'dislikes', userId);
-                    await this.commentsRepository.addValueToLikesInfo(_id, 'likes', userId);
+                    await this.commentsRepository.deleteValueFromLikesOrDislikesInfo(_id, 'dislikes', userId);
+                    await this.commentsRepository.addValueToLikesOrDislikesInfo(_id, 'likes', userId);
                 }
 
                 return createServiceResultObj("SUCCESS", "NO_CONTENT");
@@ -56,11 +56,11 @@ export class CommentsService {
 
             if (likeStatus === LikeStatusEnum.DISLIKE) {
                 if (!likes.includes(userId) && !dislikes.includes(userId)) {
-                    await this.commentsRepository.addValueToLikesInfo(_id, 'dislikes', userId);
+                    await this.commentsRepository.addValueToLikesOrDislikesInfo(_id, 'dislikes', userId);
                 }
                 if (likes.includes(userId) && !dislikes.includes(userId)) {
-                    await this.commentsRepository.deleteValueFromLikesInfo(_id, 'likes', userId);
-                    await this.commentsRepository.addValueToLikesInfo(_id, 'dislikes', userId);
+                    await this.commentsRepository.deleteValueFromLikesOrDislikesInfo(_id, 'likes', userId);
+                    await this.commentsRepository.addValueToLikesOrDislikesInfo(_id, 'dislikes', userId);
                 }
 
                 return createServiceResultObj("SUCCESS", "NO_CONTENT");
@@ -68,11 +68,11 @@ export class CommentsService {
 
             if (likeStatus === LikeStatusEnum.NONE) {
                 if (likes.includes(userId)) {
-                    await this.commentsRepository.deleteValueFromLikesInfo(_id, 'likes', userId);
+                    await this.commentsRepository.deleteValueFromLikesOrDislikesInfo(_id, 'likes', userId);
                 }
 
                 if (dislikes.includes(userId)) {
-                    await this.commentsRepository.deleteValueFromLikesInfo(_id, 'dislikes', userId);
+                    await this.commentsRepository.deleteValueFromLikesOrDislikesInfo(_id, 'dislikes', userId);
                 }
 
                 return createServiceResultObj("SUCCESS", "NO_CONTENT");

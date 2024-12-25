@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import {
     TBlogDB,
     TCommentDB,
-    TLikeInfoDB,
+    TLikePostInfoDB,
     TLogRequestsDB,
     TPasswordRecoveryDB,
     TPostDB,
@@ -19,7 +19,7 @@ export const BlogSchema = new mongoose.Schema<WithId<TBlogDB>>({
     isMembership: {type: Boolean, required: true},
 })
 
-const LikesInfoDBSchema = new mongoose.Schema<TLikeInfoDB>({
+const LikesInfoDBSchema = new mongoose.Schema<TLikePostInfoDB>({
     userId: {type: String, required: true},
     addedAt: {type: String, required: true},
     login: {type: String, required: true},
